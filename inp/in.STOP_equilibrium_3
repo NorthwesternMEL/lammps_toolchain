@@ -1,0 +1,31 @@
+# LAMMPS INPUT FILE CLEANING THE EQUILIBRIUM CONDITIONS FOR 3D GRANULAR SYSTEMS IN A GENERIC WAY
+# file: in.STOP_equilibrium_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/30/2019
+#
+# THIS IS A START SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE LOCAL AND MUST BE DISCARDED IF NOT USED IN THE MAIN SCRIPT BY CALLING THE CORRESPONDING STOP SCRIPT
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
+#
+#
+# INFO:
+# - CURRENTLY ONLY DOES CHECKS ON STRESS, IF BAD STRAIN PRESCRIBED, NOT CHECKED, ALWAYS CONSIDERS STRAINS TO BE AT EQUILIBRIUM
+#
+# TODO:
+# - MAKE CHECKS ON STRAINS (IF STRAINS END UP CHANGING i.e. TRIAXIAL)
+
+## Definition of the equilibrium verification and simulation halt
+
+
+variable eqxx delete
+variable eqyy delete
+variable eqzz delete
+variable eqxy delete
+variable eqxz delete
+variable eqyz delete
+
+variable eqke delete
+variable equfr delete
+variable eqfres delete
+variable eqtqres delete
+
+variable equilibrium_conditions delete
+unfix equilibrium_halt

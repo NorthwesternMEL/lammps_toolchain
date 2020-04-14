@@ -1,0 +1,23 @@
+# LAMMPS INPUT FILE RESETTING THE BOUNDARY CONDITIONS CONTROL FOR 3D GRANULAR SYSTEMS IN A GENERIC WAY
+# file: in.RESTART_BC_control_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/17/2019
+#
+# THIS IS A RESTART SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE DEFIEND IN THE CORRESPONDING START SCRIPT. THIS SCRIPT RESETS SOME OF THE DATA THAT NEED TO BE WHEN THE CURRENT RUN IS STOPPED AND RESUMED (mostly because of fix deform variable that must have dispalcement values of 0.0 when starting)
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
+#
+# comparison with Yade: https://github.com/yade/trunk/blob/master/pkg/dem/PeriIsoCompressor.cpp
+# INFO:
+# - strains are always based on the periodic bounding box since walls are attached to the periodic box and mapped affinely to them
+# - WE CANNOT CALL INCLUDE WITHIN AN IF COMMAND
+# - THE INCLUDE WITHIN A RUN EVERY COMMAND ARE RUN AT THE END AND NOT WHEN CALLED.
+# - WE CANNOT USE THAT FILE INSIDE THE RUN EVERY. WE WILL NOT USE IT UNTIL WE IMPLEMENTED atom-style variables FOR THE FIX ADAPT COMMAND.
+# - THIS IS ONLY USABLE IF THE RUN IS A CONTINUATION OF THE PREVIOUS RUN, INITIAL LENGTHS (FOR CALCULATIONNS OF STRAINS) WOULD NOT BE RECOMPUTED
+#
+# TODO:
+# - 
+#
+
+## Restart of the dummy particles position
+
+unfix BC_control_u0 # Unwrapped position of dummy particle at start of BC controller
+fix BC_control_u0 dummy store/state 0 xu yu zu # Unwrapped position of dummy particle at start of BC controller

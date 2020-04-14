@@ -1,0 +1,5 @@
+** This folder contains routines and elements used as a preprocessor for LAMMPS:
+- Creation of particles diameter atomfiles from measured sieve data of particle size distribution
+
+The PSD that is given must include a strict 0 and a strict 1 so that randomly generated number always lie within the data points and can be interpolated
+The PSD sieve data are given as 2 column: size, passing. size is in [mm], passing is in [-], particles smaller than size

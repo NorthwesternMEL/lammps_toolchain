@@ -1,0 +1,52 @@
+# LAMMPS INPUT FILE CLEANING THE BOUNDARY CONDITIONS CONTROL FOR 3D GRANULAR SYSTEMS IN A GENERIC WAY
+# file: in.STOP_BC_control_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/17/2019
+#
+# THIS IS A STOP SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE DISCARED FROM THE PREVIOUSLY CALLED CORRESPONDING START SCRIPT
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
+#
+# comparison with Yade: https://github.com/yade/trunk/blob/master/pkg/dem/PeriIsoCompressor.cpp
+# INFO:
+# - strains are always based on the periodic bounding box since walls are attached to the periodic box and mapped affinely to them
+#
+# TODO:
+# - ...
+#
+
+variable BC_CONTROL equal false # BC control inactive
+
+unfix BC_control_u0 
+unfix BC_control_u1 
+
+variable dXX_BC delete 
+variable dYY_BC delete
+variable dZZ_BC delete
+
+variable lx0_BC delete
+variable ly0_BC delete
+variable lz0_BC delete
+
+variable BC_XX_stiffness delete
+variable BC_YY_stiffness delete
+variable BC_ZZ_stiffness delete
+
+unfix stiffness_BC
+
+variable fXX_BC delete
+variable fYY_BC delete
+variable fZZ_BC delete
+
+unfix force_volumetric_BC
+
+if "${SHEARRELAX}" then &
+"variable dXY_BC delete" &
+"variable dXZ_BC delete" &
+"variable dYZ_BC delete" &
+"variable fXY_BC delete" &
+"variable fXZ_BC delete" &
+"variable fYZ_BC delete" &
+"unfix force_shear_BC"
+
+unfix time_integration_BC
+
+unfix controller_BC

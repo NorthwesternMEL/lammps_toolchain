@@ -1,0 +1,95 @@
+# LAMMPS INPUT FILE PERFORMING THE GRADUAL HEATING OR COOLING FOR ONE SINGLE TEMPERATURE STEP OF OF 3D GRANULAR SYSTEMS
+# file: in.RUN_HC_1step_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 08/19/2019
+#
+# THIS IS ARUN SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE LOCAL AND MUST NOT BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
+#
+#
+# INFO :
+# - THIS SCRIPT PERFORMS ITS OWN RUN
+# - MUST BE CALLED AFTER in.DEF_param_heating_cooling_3 SCRIPT
+# - MUST BE CALLED AFTER in.SET_heating_cooling_3 SCRIPT
+#
+# TODO:
+# - Changing size with a fix or variable is not possible for clumps rigid body must be re-initialized at the beginning of a run
+# - We might define our own fix that does so (assuming thermal expansion small enough to not change the inertia or mass properties? Or not, like fix adapt)
+# - 
+
+# ---- DETERMINE INITIAL/FINAL TEMPERATURES AND PARTICLES EXPANSION/CONTRACTION BASED ON HEATING or COOLING ---- #
+
+variable DTinitial equal $(v_DTcurrent)
+
+if "${HEATING}" then "variable DTfinal equal $(v_DTcurrent + v_DTstep)" &
+elif "!${HEATING}" "variable DTfinal equal $(v_DTcurrent - v_DTstep)" &
+else "print 'Script Error: variable HEATING should have value true or false and was given $(v_HEATING)'" "quit"
+
+# ---- TEMPERATURE VARIATION RUN ---- #
+
+variable step0temp equal $(step)
+variable DTcurrent equal "v_DTinitial + (v_DTfinal - v_DTinitial)*(step-v_step0temp)/v_Nrun_hc" # Current temperature during the run
+
+if "${SPHERE}" then "jump SELF lbl_sphere_RUN_HC" &
+elif "!${SPHERE}" &
+"variable DTprior equal 'v_DTinitial + (v_DTfinal - v_DTinitial)*(step-v_step0temp-v_Nevery_hc)/v_Nrun_hc' # Temperature at the end of the prior temperature increase, `Nevery_hc` timestep before the current timestep" &
+"variable xhc atom c_com_clump_global[1]+(1.0+v_lcte*v_DTcurrent)*(c_coordu_particles[1]-c_com_clump_global[1])/(1.0+v_lcte*v_DTprior) # Remapped unwrapped new xu coordinates of all particles in all clumps" &
+"variable yhc atom c_com_clump_global[2]+(1.0+v_lcte*v_DTcurrent)*(c_coordu_particles[2]-c_com_clump_global[2])/(1.0+v_lcte*v_DTprior) # Remapped unwrapped new yu coordinates of all particles in all clumps" &
+"variable zhc atom c_com_clump_global[3]+(1.0+v_lcte*v_DTcurrent)*(c_coordu_particles[3]-c_com_clump_global[3])/(1.0+v_lcte*v_DTprior) # Remapped unwrapped new zu coordinates of all particles in all clumps" &
+"variable ix atom floor((v_xhc-xlo)/lx) # Image flag for all particles, to reconstruct the rigid bodies consistently across PBC" &
+"variable iy atom floor((v_yhc-ylo)/ly) # Image flag for all particles, to reconstruct the rigid bodies consistently across PBC" &
+"variable iz atom floor((v_zhc-zlo)/lz) # Image flag for all particles, to reconstruct the rigid bodies consistently across PBC" &
+"jump SELF lbl_non_sphere_RUN_HC" &
+else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
+
+
+## INFLATION OF SPHERES
+
+label lbl_sphere_RUN_HC
+
+if "${BC_CONTROL}" then &
+"run ${Nrun_hc} pre yes post no every ${Nevery_hc} &
+'set group particles diameter v_diameterhc' &
+'unfix BC_control_u0 # Must reset the displacement to zero for fix deform' &
+'fix BC_control_u0 dummy store/state 0 xu yu zu # Must reset the displacement to zero for fix deform'" &
+elif "!${BC_CONTROL}" &
+"run ${Nrun_hc} pre yes post no every ${Nevery_hc} &
+'set group particles diameter v_diameterhc'" &
+else &
+"print 'Script Error: variable BC_CONTROL should have value true or false and was given $(v_BC_CONTROL)'" &
+"quit"
+
+jump SELF lbl_end_RUN_HC
+
+## INFLATION OF NON-SPHERES
+
+label lbl_non_sphere_RUN_HC
+
+if "${BC_CONTROL}" then &
+"run ${Nrun_hc} pre yes post no every ${Nevery_hc} &
+'set group particles x v_xhc y v_yhc z v_zhc diameter v_diameterhc image v_ix v_iy v_iz' &
+'unfix BC_control_u0' &
+'fix BC_control_u0 dummy store/state 0 xu yu zu'" &
+elif "!${BC_CONTROL}" &
+"run ${Nrun_hc} pre yes post no every ${Nevery_hc} &
+'set group particles x v_xhc y v_yhc z v_zhc diameter v_diameterhc image v_ix v_iy v_iz'" &
+else &
+"print 'Script Error: variable BC_CONTROL should have value true or false and was given $(v_BC_CONTROL)'" &
+"quit"
+
+# ---- CLEAR LOCAL DATA FOR NON-SPHERE ---- #
+
+variable DTprior delete
+variable xhc delete
+variable yhc delete
+variable zhc delete
+variable ix delete
+variable iy delete
+variable iz delete
+
+label lbl_end_RUN_HC
+
+# ---- CLEAR LOCAL DATA FOR ALL ---- #
+
+variable DTcurrent equal ${DTfinal} # Useless or potential rounding issues ?
+variable DTinitial delete
+variable DTfinal delete

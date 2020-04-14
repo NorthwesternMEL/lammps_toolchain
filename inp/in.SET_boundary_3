@@ -1,0 +1,98 @@
+# LAMMPS INPUT FILE SETTING UP THE BOUNDARY CONDITIONS OF THE SIMULATION FOR 3D GRANULAR SYSTEMS
+# file: in.SET_boundary_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 08/07/2019
+#
+# THIS IS A SET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT MUST NOT BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+# THIS SCRIPT SHOULD NOT BE MODIFIED
+#
+#
+# INFO :
+# - MUST BE CALLED AFTER ALL DEF SCRIPTS
+# - MUST BE CALLED BEFORE in.SET_structure SCRIPT
+# - MUST BE CALLED BEFORE in.SET_conv SCRIPT
+#
+# TODO:
+# - possibility to have only one wall to move in each direction, vs symmetric motion of both walls?
+# - selec the file from which to read the wall coordinates. Lammps command-line input variable?
+# - figure out mindlin rescale after it is debugged in LAMMPS
+
+# ---- DETERMINES IF SIMULATION WITH WALLS OR PBC ---- #
+
+# variable SET_FLAG_WALL determines if all axes have consistent wall vs pbc. Current resitrction. We may generalize in the future 
+if "${BC_XX_WALL} && ${BC_YY_WALL} && ${BC_ZZ_WALL}" then &
+"variable SET_FLAG_WALL equal true" &
+"variable xlo_0 equal $(xlo) # Initial coordinates of the periodic box" &
+"variable xhi_0 equal $(xhi) # Initial coordinates of the periodic box" &
+"variable ylo_0 equal $(ylo) # Initial coordinates of the periodic box" &
+"variable yhi_0 equal $(yhi) # Initial coordinates of the periodic box" &
+"variable zlo_0 equal $(zlo) # Initial coordinates of the periodic box" &
+"variable zhi_0 equal $(zhi) # Initial coordinates of the periodic box" &
+elif "!${BC_XX_WALL} && !${BC_YY_WALL} && !${BC_ZZ_WALL}" &
+"variable SET_FLAG_WALL equal false" &
+else &
+"print 'Script Error: boundaries must either all be periodic or all have walls. Flags BC_AXIS_WALL were given $(v_BC_XX_WALL), $(v_BC_YY_WALL) and $(v_BC_ZZ_WALL)'" &
+"quit"
+
+# ---- DETERMINE IF WALL POSITION SHOULD BE PRESCRIBED OR READ FROM FILE ---- #
+
+if "${READWALL} && ${SET_FLAG_WALL}" then &
+"variable wpos file wpos0.txt # read the position of the wall from cooridnates after deposition" &
+"variable xlo_0_BC equal $(v_wpos)" &
+"next wpos" &
+"variable xhi_0_BC equal $(v_wpos)" &
+"next wpos" &
+"variable ylo_0_BC equal $(v_wpos)" &
+"next wpos" &
+"variable yhi_0_BC equal $(v_wpos)" &
+"next wpos" &
+"variable zlo_0_BC equal $(v_wpos)" &
+"next wpos" &
+"variable zhi_0_BC equal $(v_wpos) # No more next wpos so as not make the variable dead and jump possible subsequent loop commands" &
+elif "!${READWALL} && ${SET_FLAG_WALL}" &
+"variable xlo_0_BC equal $(v_xlo_0+v_dmax*v_spacing*v_wallpad)" &
+"variable xhi_0_BC equal $(v_xhi_0-v_dmax*v_spacing*v_wallpad)" &
+"variable ylo_0_BC equal $(v_ylo_0+v_dmax*v_spacing*v_wallpad)" &
+"variable yhi_0_BC equal $(v_yhi_0-v_dmax*v_spacing*v_wallpad)" &
+"variable zlo_0_BC equal $(v_zlo_0+v_dmax*v_spacing*v_wallpad)" &
+"variable zhi_0_BC equal $(v_zhi_0-v_dmax*v_spacing*v_wallpad)" &
+elif "${SET_FLAG_WALL}" &
+"print 'Script Error: variable READWALL should have value true or false and was given $(v_READWALL)'" &
+"quit"
+
+# ---- CREATES WALLS (IF WALLS), DEFINES THE BOUNDARY CONDITIONS PROPERTIES ---- #
+
+if "${SET_FLAG_WALL}" then &
+"variable xhi_BC equal 'xlo + (xhi-xlo)*(v_xhi_0_BC-v_xlo_0)/(v_xhi_0-v_xlo_0)' # The position of the walls is mapped to that of the periodic cell" &
+"variable yhi_BC equal 'ylo + (yhi-ylo)*(v_yhi_0_BC-v_ylo_0)/(v_yhi_0-v_ylo_0)' # The position of the walls is mapped to that of the periodic cell" &
+"variable zhi_BC equal 'zlo + (zhi-zlo)*(v_zhi_0_BC-v_zlo_0)/(v_zhi_0-v_zlo_0)' # The position of the walls is mapped to that of the periodic cell" &
+"variable xlo_BC equal 'xlo + (xhi-xlo)*(v_xlo_0_BC-v_xlo_0)/(v_xhi_0-v_xlo_0)' # The position of the walls is mapped to that of the periodic cell" &
+"variable ylo_BC equal 'ylo + (yhi-ylo)*(v_ylo_0_BC-v_ylo_0)/(v_yhi_0-v_ylo_0)' # The position of the walls is mapped to that of the periodic cell" &
+"variable zlo_BC equal 'zlo + (zhi-zlo)*(v_zlo_0_BC-v_zlo_0)/(v_zhi_0-v_zlo_0)' # The position of the walls is mapped to that of the periodic cell" &
+"variable dxlo_BC equal 'v_xlo_BC - v_xlo_0_BC'" &
+"variable dxhi_BC equal 'v_xhi_BC - v_xhi_0_BC'" &
+"variable dylo_BC equal 'v_ylo_BC - v_ylo_0_BC'" &
+"variable dyhi_BC equal 'v_yhi_BC - v_yhi_0_BC'" &
+"variable dzlo_BC equal 'v_zlo_BC - v_zlo_0_BC'" &
+"variable dzhi_BC equal 'v_zhi_BC - v_zhi_0_BC'" &
+"region wxlo plane ${xlo_0_BC} $(0.5*(ylo+yhi)) $(0.5*(zlo+zhi)) 1 0 0 move v_dxlo_BC NULL NULL units box # Wall on xlo side" &
+"region wxhi plane ${xhi_0_BC} $(0.5*(ylo+yhi)) $(0.5*(zlo+zhi)) -1 0 0 move v_dxhi_BC NULL NULL units box # Wall on xhi side" &
+"region wylo plane $(0.5*(xlo+xhi)) ${ylo_0_BC} $(0.5*(zlo+zhi)) 0 1 0 move NULL v_dylo_BC NULL units box # Wall on ylo side" &
+"region wyhi plane $(0.5*(xlo+xhi)) ${yhi_0_BC} $(0.5*(zlo+zhi)) 0 -1 0 move NULL v_dyhi_BC NULL units box # Wall on yhi side" &
+"region wzlo plane $(0.5*(xlo+xhi)) $(0.5*(ylo+yhi)) ${zlo_0_BC} 0 0 1 move NULL NULL v_dzlo_BC units box # Wall on zlo side" &
+"region wzhi plane $(0.5*(xlo+xhi)) $(0.5*(ylo+yhi)) ${zhi_0_BC} 0 0 -1 move NULL NULL v_dzhi_BC units box # Wall on zlo side" &
+"fix wxlo particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wxlo # frictionless xlo wall" &
+"fix wxhi particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wxhi # frictionless xlo wall" &
+"fix wylo particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wylo # frictionless ylo wall" &
+"fix wyhi particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wyhi # frictionless ylo wall" &
+"fix wzlo particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wzlo # frictionless zlo wall" &
+"fix wzhi particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wzhi # frictionless zlo wall" &
+"variable lx equal 'v_xhi_BC - v_xlo_BC'" &
+"variable ly equal 'v_yhi_BC - v_ylo_BC'" &
+"variable lz equal 'v_zhi_BC - v_zlo_BC'" &
+"variable vol equal 'v_lx*v_ly*v_lz'" &
+else &
+"variable lx equal lx" &
+"variable ly equal ly" &
+"variable lz equal lz" &
+"variable vol equal vol"

@@ -1,0 +1,9 @@
+# Input files Git ignore file 
+
+
+dev_legacy/
+moltemplate/
+PSDtemplate/
+
+log.*
+dump.*

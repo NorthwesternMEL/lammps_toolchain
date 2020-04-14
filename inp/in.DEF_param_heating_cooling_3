@@ -1,0 +1,28 @@
+# LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR THE HEATING AND COOLING PROPERTIES OF 3D GRANULAR SYSTEMS
+# file: in.DEF_param_heating_cooling_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/30/2019
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+#
+#
+# INFO :
+# - #?MUST BE DEFINED AFTER DEF_param_material_3 IN MAIN SCRIPT
+# - #?MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
+#
+# TODO:
+# - 
+# - 
+
+# ---- HEATING COOLING PARAMETERS ---- #
+
+variable HEATING equal true # flag that must be overwritten when necessary in the script and tell if there is  heating or cooling. false=cooling ; true=heating
+variable DTcurrent equal 0 # Cumulative global temperature variation from the initial temperature T0 through the multiple runs [K]
+variable DTtarget equal 100.0 # Temperatuve variation [K] (absolute value, always positive. Ideally a multiple of DTstep)
+variable DTstep equal 1.0 # Temperature increments [K / heating step]
+variable Nrun_hc equal 50000 # Number of timestep during which the geometry is changed due to heating/cooling
+variable Nevery_hc equal 10 # Frequency of geometry change during heating
+variable Ncycle equal 1 # Number of heating - cooling cycles
+
+
+

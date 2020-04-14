@@ -1,0 +1,104 @@
+# LAMMPS INPUT FILE DEFINING THE PARTICLES USED IN THE GRANULAR SYSYEM WITH THEIR PROPERTIES AND PARAMETERS
+# file: in.DEF_init_particles_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 09/12/2019
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+#
+#
+# INFO :
+# - MUST BE CALLED AFTER DEF_init_pre_3 IN MAIN SCRIPT
+# - MUST BE CALLED BEFORE DEF_param SCRIPTS IN MAIN SCRIPT
+# - WE DEFINE THE FOLLOWING PARTICLE TYPES:
+# -- sphere = spherical particles;
+# -- elar2_N7 = ellipsoid particles, aspect ratio 1:2, 7 particles in clump;
+# -- clump_albaba = clump of 2 equal spheres with radius overlap;
+# -- to be completed with the definition of new clumps particles in the moltemplate bank
+#
+# - ALL ELLIPSOID MOLECULE TEMPLATES MUST HAVE A CENTRAL PARTICLE OF TYPE 1 AND DIAMETER 1
+#
+# TODO:
+# - 
+# - 
+
+# ---- PARAMETERS ---- #
+#
+variable particle_type string sphere # particle types available: (sphere=sphere), (elar2_N7=ellipsoid, aspect ratio = 2, 7 particle in clump), (clump_albaba= clump of 2 equal spheres with radius overlap) TO BE READ FROM EXTERNAL OR CONSOLE
+variable SPHERE equal true # Flag for particle type: true=spherical particals, false=ellipsoids obtained using clumps of spheres
+
+
+# ---- PARTICLE TYPE SELECTION ---- #
+#
+if "${particle_type}==sphere" then "jump SELF lbl_sphere_particles" &
+elif "${particle_type}==elar2_N7" "jump SELF lbl_elar2_N7_particles" &
+elif "${particle_type}==clump_albaba" "jump SELF lbl_clump_albaba_particles"
+# -- to be completed with the definition of new clumps particles in the moltemplate bank
+# To be completed with a default error else statement
+
+
+
+#################################
+# ---- SPHERICAL PARTICLES ---- #
+#################################
+
+label lbl_sphere_particles
+
+variable SPHERE equal true # Default value
+variable aspectratio_particles equal 1 # Aspect ratio of the particle: longest principal length / shotest principal length
+
+jump SELF lbl_end_particles
+
+
+
+
+
+
+
+#################################
+# ---- ELLIPSOID PARTICLES ---- #
+#################################
+
+# ---- APECT RATIO 1:2 , 7 PARTICLES IN CLUMP ---- #
+
+label lbl_elar2_N7_particles
+
+variable SPHERE equal false
+variable aspectratio_particles equal 2 # Aspect ratio of the particle: longest principal length / shotest principal length, NOT SAFE ! HOW TO GET IT FROM THE MOLECULE FILE ?
+variable clump_filename string moltemplate/clump_elar2_N7.mol # Path and name of the corresponding molecule tempalte for the clump
+variable Nppc equal 7 # Number of particles per clump forming the ellipsoid, useless ?
+
+jump SELF lbl_end_particles
+
+
+
+
+
+# ---- APECT RATIO X:Y , NN PARTICLES IN CLUMP ---- #
+
+
+
+
+
+
+
+
+#############################
+# ---- OTHER PARTICLES ---- #
+#############################
+
+label lbl_clump_albaba_particles
+
+variable SPHERE equal false
+variable aspectratio_particles equal 1.5 # Aspect ratio of the particle: longest principal length / shotest principal length, NOT SAFE ! HOW TO GET IT FROM THE MOLECULE FILE ?
+variable clump_filename string moltemplate/clump_albaba.mol # Path and name of the corresponding molecule tempalte for the clump
+variable Nppc equal 2 # Number of particles per clump forming the ellipsoid, useless ?
+
+jump SELF lbl_end_particles
+
+
+
+
+# EOF - jump here after the particle has been defined
+
+label lbl_end_particles
+variable spacing equal "(v_aspectratio_particles > 1)*v_aspectratio_particles + (v_aspectratio_particles <= 1)*1.0"

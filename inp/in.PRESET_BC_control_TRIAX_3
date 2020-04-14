@@ -1,0 +1,39 @@
+# LAMMPS INPUT FILE DEFINING THE FLAGS FOR BOUNDARY CONDITIONS CONTROL FOR 3D GRANULAR SYSTEMS: AXISYMMETRIC TRIAXIAL STRESS CONDITIONS
+# file: in.PRESET_BC_control_TRIAX_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 10/10/2019
+#
+# THIS IS A PRESET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND ARE LOCALLY REDEFINED ACCORDING TO PRESET VALUES
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
+# PRESET SCRIPT MUST BE CALLED BEFORE THE CORRESPONDING START SCRIPT
+#
+#
+# INFO:
+# - Users MUST overwrite the BC_ZZ_TARGET value with a user-defined time-dependent strain path
+#
+# TODO:
+# - 
+# - 
+
+variable BC_XX_STRESS_CONTROLLED equal true # BC in XX axis is: true=stress-controlled
+variable BC_YY_STRESS_CONTROLLED equal true # BC in YY axis is: true=stress-controlled
+variable BC_ZZ_STRESS_CONTROLLED equal false # BC in ZZ axis is: false=strain-controlled
+
+if "(${BC_XX_WALL} && ${BC_YY_WALL} && ${BC_ZZ_WALL}) || !${SHEARRELAX}" then &
+"variable BC_XY_STRESS_CONTROLLED equal false # This flag must be false (strain-controlled) when using walls and the associated value must be zero because tilt is not allowed when using frictionless walls" &
+"variable BC_XZ_STRESS_CONTROLLED equal false # This flag must be false (strain-controlled) when using walls and the associated value must be zero because tilt is not allowed when using frictionless walls" &
+"variable BC_YZ_STRESS_CONTROLLED equal false # This flag must be false (strain-controlled) when using walls and the associated value must be zero because tilt is not allowed when using frictionless walls" &
+elif "!${BC_XX_WALL} && !${BC_YY_WALL} && !${BC_ZZ_WALL} && ${SHEARRELAX}" &
+"variable BC_XY_STRESS_CONTROLLED equal true # BC in XY axis is: true=stress-controlled" &
+"variable BC_XZ_STRESS_CONTROLLED equal true # BC in XZ axis is: true=stress-controlled" &
+"variable BC_YZ_STRESS_CONTROLLED equal true # BC in YZ axis is: true=stress-controlled" &
+else &
+"print 'Script Error: boundaries must either all be periodic or all have walls. Flags BC_AXIS_WALL were given $(v_BC_XX_WALL), $(v_BC_YY_WALL) and $(v_BC_ZZ_WALL)'" &
+"quit"
+
+
+variable BC_XX_TARGET equal v_P0 # Target value of STRESS in XX axis, can be overwritten in the MAIN script after that PRESET script is called
+variable BC_YY_TARGET equal v_P0 # Target value of STRESS in YY axis, can be overwritten in the MAIN script after that PRESET script is called
+variable BC_ZZ_TARGET equal -1.0 # Target value of STRAIN in ZZ axis, MUST be overwritten in the MAIN script after that PRESET script is called
+variable BC_XY_TARGET equal 0.0 # Target value of STRESS or STRAIN in XY axis. This value should be zero (0) in most cases: zero strain with walls or PBC, zero stress in shear-relaxed PBC
+variable BC_XZ_TARGET equal 0.0 # Target value of STRESS or STRAIN in XZ axis. This value should be zero (0) in most cases: zero strain with walls or PBC, zero stress in shear-relaxed PBC
+variable BC_YZ_TARGET equal 0.0 # Target value of STRESS or STRAIN in YZ axis. This value should be zero (0) in most cases: zero strain with walls or PBC, zero stress in shear-relaxed PBC

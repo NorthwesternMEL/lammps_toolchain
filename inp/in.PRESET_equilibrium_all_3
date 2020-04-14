@@ -1,0 +1,21 @@
+# LAMMPS INPUT FILE DEFINING THE DEFAULT VALUES FOR EQUILIBRATION OF ALL VARIABLES FOR 3D GRANULAR SYSTEMS
+# file: in.PRESET_equilibrium_all_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/30/2019
+#
+# THIS IS A PRESET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND ARE LOCALLY REDEFINED ACCORDING TO PRESET VALUES
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
+# PRESET SCRIPT MUST BE CALLED BEFORE THE CORRESPONDING START SCRIPT
+#
+#
+# INFO:
+# - SETS DEFAULT TOLERANCE FOR ALL VARIABLES 
+#
+# TODO:
+# - 
+# - 
+
+variable tolke equal 1e-8 # Relative tolerance on the average kinetic energy [Radaji Dubois 2011]
+variable tolfres equal 1e-4 # Relative tolerance on the force residual [Radaji Dubois 2011] recommended 1e-4 by Agnolin but too strong in polydisperse
+variable toltqres equal 1e-4 # Relative tolerance on the torque residual
+variable tolufr equal 1e-5 # Tolerance on the unbalanced force ratio [Wautier,Zhao2016] use 1e-5
+variable tolp 	equal 1e-4 # Relative tolerance on the pressure [Suiker 2004]

@@ -1,0 +1,7 @@
+# Git ignore file 
+
+
+test/
+sample_database/
+
+*.pyc

@@ -1,0 +1,73 @@
+# LAMMPS INPUT FILE DEFINING THE EQUILIBRIUM CONDITIONS FOR 3D GRANULAR SYSTEMS IN A GENERIC WAY
+# file: in.START_equilibrium_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/30/2019
+#
+# THIS IS A START SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE LOCAL AND MUST BE DISCARDED IF NOT USED IN THE MAIN SCRIPT BY CALLING THE CORRESPONDING STOP SCRIPT
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES, IN PARTICULAR, IT CAN BE CALLED SUCCESSIVELY AND ACTS AS A RESTART. NO NEED TO DO START - STOP - START, START - START WORKS, THIS ALLOWS CHANGES IN EQUILIBRIUM CONDITIONS BETWEEN RUNS
+#
+#
+# INFO:
+# - CURRENTLY ONLY DOES CHECKS ON STRESS, IF BAD STRAIN PRESCRIBED, NOT CHECKED, ALWAYS CONSIDERS STRAINS TO BE AT EQUILIBRIUM
+#
+# TODO:
+# - MAKE CHECKS ON STRAINS (IF STRAINS END UP CHANGING i.e. TRIAXIAL)
+
+## Definition of the equilibrium verification and simulation halt
+
+if "${BC_CONTROL} && ${BC_XX_STRESS_CONTROLLED}" then &
+"variable eqxx equal 'v_convpxx < v_tolp'" &
+elif "!${BC_CONTROL} || !${BC_XX_STRESS_CONTROLLED}" &
+"variable eqxx equal true" &
+else &
+"print 'Script Error: flag BC_XX_STRESS_CONTROLLED should have value true or false and was given $(v_BC_XX_STRESS_CONTROLLED)'" &
+"quit"
+
+if "${BC_CONTROL} && ${BC_YY_STRESS_CONTROLLED}" then &
+"variable eqyy equal 'v_convpyy < v_tolp'" &
+elif "!${BC_CONTROL} || !${BC_YY_STRESS_CONTROLLED}" &
+"variable eqyy equal true" &
+else &
+"print 'Script Error: flag BC_YY_STRESS_CONTROLLED should have value true or false and was given $(v_BC_YY_STRESS_CONTROLLED)'" &
+"quit"
+
+if "${BC_CONTROL} && ${BC_ZZ_STRESS_CONTROLLED}" then &
+"variable eqzz equal 'v_convpzz < v_tolp'" &
+elif "!${BC_CONTROL} || !${BC_ZZ_STRESS_CONTROLLED}" &
+"variable eqzz equal true" &
+else &
+"print 'Script Error: flag BC_ZZ_STRESS_CONTROLLED should have value true or false and was given $(v_BC_ZZ_STRESS_CONTROLLED)'" &
+"quit"
+
+if "${BC_CONTROL} && ${BC_XY_STRESS_CONTROLLED}" then &
+"variable eqxy equal 'v_convpxy < v_tolp'" &
+elif "!${BC_CONTROL} || !${BC_XY_STRESS_CONTROLLED}" &
+"variable eqxy equal true" &
+else &
+"print 'Script Error: flag BC_XY_STRESS_CONTROLLED should have value true or false and was given $(v_BC_XY_STRESS_CONTROLLED)'" &
+"quit"
+
+if "${BC_CONTROL} && ${BC_XZ_STRESS_CONTROLLED}" then &
+"variable eqxz equal 'v_convpxz < v_tolp'" &
+elif "!${BC_CONTROL} || !${BC_XZ_STRESS_CONTROLLED}" &
+"variable eqxz equal true" &
+else &
+"print 'Script Error: flag BC_YY_STRESS_CONTROLLED should have value true or false and was given $(v_BC_XZ_STRESS_CONTROLLED)'" &
+"quit"
+
+if "${BC_CONTROL} && ${BC_YZ_STRESS_CONTROLLED}" then &
+"variable eqyz equal 'v_convpyz < v_tolp'" &
+elif "!${BC_CONTROL} || !${BC_YZ_STRESS_CONTROLLED}" &
+"variable eqyz equal true" &
+else &
+"print 'Script Error: flag BC_YZ_STRESS_CONTROLLED should have value true or false and was given $(v_BC_YZ_STRESS_CONTROLLED)'" &
+"quit"
+
+variable eqke equal "v_convke < v_tolke" # Not expressed in ratio form to avoid division by zero
+variable equfr equal "v_convufr < v_tolufr" # Not expressed in ratio form to avoid division by zero
+variable eqfres equal "v_convfres < v_tolfres" # Currently unused
+variable eqtqres equal "v_convtqres < v_toltqres" # Currently unused
+
+
+variable equilibrium_conditions equal "v_eqxx && v_eqyy && v_eqzz && v_eqxy && v_eqxz && v_eqyz && v_eqke && v_equfr && v_eqfres && v_eqtqres"
+fix equilibrium_halt all halt ${Ncheck} v_equilibrium_conditions == 1 error continue
+

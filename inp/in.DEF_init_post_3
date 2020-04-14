@@ -1,0 +1,33 @@
+# LAMMPS INPUT FILE DEFINING THE INITIALIZATION PARAMETERS OF LAMMPS (AFTER read_restart COMMAND) FOR 3D GRANULAR SIMULATIONS
+# file: in.DEF_init_post_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 09/12/2019
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME WHEN RESTART FILES ARE ALREADY DEFINED
+# ALL INFORMATION/COMMANDS PRESENT IN THIS SCRIPT ARE NOT SAVED IN RESTART FILES
+# INFORMATION/COMMANDS SAVED IN RESTART FILES BY LAMMPS (units, dimension, boundary, atom_style, comm_modify, atom_modify) ARE DEFINED IN THE 'PRE' DEF SCRIPT: in.DEF_init_pre_3
+# SEE LIST OF INFORMATION SAVED IN RESTART FILES: https://lammps.sandia.gov/doc/read_restart.html)
+#
+# INFO :
+# - MUST BE LAST DEF SCRIPT CALLED
+#
+# TODO:
+# - 
+# - 
+
+# ---- LAMMPS SIMULATION SETUP ---- #
+
+#fix prop all property/atom mol ghost yes # Add molecular information to sphere for use of clump particles
+if "${SPHERE}" then "neigh_modify delay 0 exclude type 1 2 exclude type 2 2" &
+elif "!${SPHERE}" &
+"neigh_modify delay 0 exclude type 1 2 exclude type 2 2 exclude type 3 2 exclude molecule/intra all" &
+"fix prop all property/atom mol ghost yes # Add molecular information to sphere for use of clump particles" &
+else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
+newton off
+neighbor $(v_dmax*0.1) bin
+timestep $(v_dt0r*v_tsyshertz_rot)
+
+
+
+
+

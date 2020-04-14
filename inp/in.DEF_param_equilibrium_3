@@ -1,0 +1,27 @@
+# LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR EQUILIBRIUM OF 3D GRANULAR SYSTEMS
+# file: in.DEF_param_equilibrium_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/30/2019
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+#
+#
+# INFO :
+# - 
+#
+# TODO:
+# - 
+# - 
+
+# ---- PARAMETERS ---- #
+
+variable tolke equal 1e-8 # Relative tolerance on the average kinetic energy [Radaji Dubois 2011]
+variable tolfres equal 1e-4 # Relative tolerance on the force residual [Radaji Dubois 2011] recommended 1e-4 by Agnolin but too strong in polydisperse
+variable toltqres equal 1e-4 # Relative tolerance on the torque residual
+variable tolufr equal 1e-5 # Tolerance on the unbalanced force ratio [Wautier,Zhao2016] use 1e-5
+variable tolp 	equal 1e-4 # Relative tolerance on the pressure [Suiker 2004]
+
+
+
+
+

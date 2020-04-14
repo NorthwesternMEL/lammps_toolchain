@@ -1,0 +1,52 @@
+# LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR THE SIMULATION PROPERTIES OF 3D GRANULAR SYSTEMS
+# file: in.DEF_param_simulation_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/30/2019
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+#
+#
+# INFO :
+# - MUST BE DEFINED AFTER DEF_param_material_3 IN MAIN SCRIPT
+# - MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
+# - THE INFORMATION IS VALID FOR SPHERES AND REVOLUTION ELLIPSOIDS (a=b)
+#
+# TODO:
+# - 
+# - 
+
+# ---- DEM PARAMETERS ---- #
+
+variable P0 equal 1*1e3 # Target isostatic mean pressure [Pa]
+variable Ptarget equal 250*1e3 # Target pressure at which the subsequent simulations would be carried out [Pa]
+#variable knhertz equal "4*v_G/(3*(1-v_nu))" # Normal stiffness for Hertz contact law
+#variable kthertz equal "4*v_G/(2-v_nu)" # Tangent stiffness for Hertz contact law
+variable In0 equal 1e-4 # Inertial number
+variable K0 equal "(v_E/(v_P0*(1-v_nu^2)))^(2/3)" # Dimensionless stiffness number for Hertzian contact in 3D... might be wrong in 2D, look into cylinder contact and linear force in literature from Wikipedia
+variable tsys equal "v_dmin*sqrt(v_rho/v_E)" # Characteristic time of the simulation. Critical timestep
+variable dsys equal "0.5*(v_dmin + v_dmax)" # Characteristic diameter of the sample. Assume uniform distribution
+variable Fsys equal "v_P0*v_dsys^2" # Characteristic force of the system
+variable msys equal "PI*v_dsys^3*v_aspectratio_particles*v_rho/6" # Characteristic mass of the system, valid for both spheres and ellipsoids
+variable mmin equal "PI*v_dmin^3*v_aspectratio_particles*v_rho/6" # Mass of the lightest particle, valid for both spheres and ellipsoids
+variable Insys equal "0.1*v_msys*v_dsys^2" # Characteristic moment of inertia of the system I = (2/5) * m r^2 = m d^2/10
+variable Inmin equal "0.1*v_mmin*v_dmin^2" # Minimum moment of inertia of the system I = (2/5) * m r^2 = m d^2/10
+variable Tqsys equal "v_Fsys*v_dsys" #Characteristic torque of the system
+variable tiner equal "v_dmax*sqrt(v_rho/v_P0)"
+variable ratemax equal "v_In0/v_tiner"
+variable hertzstiff equal "v_E*(2*v_dmin*v_dmax/(v_dmin+v_dmax))/(2*(1-v_nu^2)*sqrt(v_K0))" # Normal Hertz stiffness
+variable hertzstiff_rot equal "v_hertzstiff*(2-2*v_nu)/(2-v_nu)" # tangential Hertz stiffness 
+variable hertzstiff_tstep equal "v_E*(2*v_dmin*v_dmax/(v_dmin+v_dmax))/(2*(1-v_nu^2)*sqrt(1000))" # This is the tangent modulus, most people use secant modulus (divided by 3 instead of 2 which gives a smaller stiffness)... The lower limit of overlap is considered to be for a stiffness number of K0=1000 [Radjai Dubois]. We use dmin since timestep scales with d and is minimum for dmin, although it corresponds to the minimum stiffness (scaling argument). O'Sullivan uses 5% overlap of dmin
+variable hertzstiff_rot_tstep equal "v_hertzstiff_tstep*(2-2*v_nu)/(2-v_nu)" # tangential Hertz stiffness for an overlap of K0=1000
+variable tsyshertz equal "sqrt(v_mmin/v_hertzstiff_tstep)"
+variable tsyshertz_rot equal "sqrt(2*v_mmin/(5*v_hertzstiff_rot_tstep))"
+variable dt0r equal 0.2 # Critical timestep ratio dt = dt0r*t_sys, will be overwritten after compaction to smaller value
+variable damp0particles equal 0.2 # Damping ratio for particles using Cundall/Yade-DEM damping
+variable visc0particles equal 0.01 # Viscous damping ratio
+
+# ---- RUN AND OUTPUT PARAMETERS ---- #
+
+variable Nrun equal 100000 # Number of timestep of a classic run (ramps, etc)
+variable Nmax equal 10000000 # Maximum number of timesteps during a run
+variable Ncheck equal 1000 # Frequency of equilibrium checks, dynamic group redefinition etc
+variable Nthermo equal 50000 # Frequency of thermo output
+variable Ndump equal 10000 # Frequency of dump output

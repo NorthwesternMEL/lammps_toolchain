@@ -1,0 +1,29 @@
+# LAMMPS INPUT FILE SETTING UP AND DEFINING THE REQUIRED INFORMATION FOR THE OEDOMETRIC TESTING OF THE 3D GRANULAR SYSTEMS
+# file: in.SET_oedo_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 08/08/2019
+#
+# THIS IS A SET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT MUST NOT BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+# THIS SCRIPT SHOULD NOT BE MODIFIED
+#
+#
+# INFO :
+# - MUST BE CALLED AFTER in.DEF_param_triaxial_3 SCRIPT
+# - MUST BE CALLED AFTER in.SET_macro_properties_3 SCRIPT
+#
+# TODO:
+# - 
+# - 
+
+
+# ---- TOTAL SIMULATION EVOLUTION INFORMATION ---- #
+
+variable vol0 equal $(v_vol) # Initial volume at the moment the script is called, before any loading is applied
+variable epsv equal "v_vol/v_vol0 - 1.0" # Volumetric strain with reference to the first time the present script is called
+
+variable lz0 equal $(v_lz) # Initial length in z direction
+variable epsz equal "v_lz/v_lz0 - 1.0" # Engineering strain in z direction with reference to the first time the present script is called
+
+variable voidratio0 equal $(v_voidratio) # Initial void ration at the moment the script is called, before any loading is applied
+variable deltavoidratio equal "v_voidratio - v_voidratio0" # Variation in void ratio
+

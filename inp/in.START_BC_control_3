@@ -1,0 +1,157 @@
+# LAMMPS INPUT FILE DEFINING THE BOUNDARY CONDITIONS CONTROL FOR 3D GRANULAR SYSTEMS IN A GENERIC WAY
+# file: in.START_BC_control_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/17/2019
+#
+# THIS IS A START SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE LOCAL AND MUST BE DISCARDED IF NOT USED IN THE MAIN SCRIPT BY CALLING THE CORRESPONDING STOP SCRIPT
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
+#
+# comparison with Yade: https://github.com/yade/trunk/blob/master/pkg/dem/PeriIsoCompressor.cpp
+# INFO:
+# - strains are always based on the periodic bounding box since walls are attached to the periodic box and mapped affinely to them
+# - The strain is defined as the 'true' or logarithmic strain. Similar strain definition must be adopted in the simulations
+# - Expansive strains are positive. Contractile strains are negative
+#
+# TODO:
+# - Determine exact strain-controlled formulas for shear/tilt BC : meanwhile, TEMP solution that only works for 0 tilt strain ! OK since this is what we mostly use anyway with strain control (no tilt of walls)
+# - Define a way that only moves one boundary (like the delta mode). This would be useful to have maximum displacement along boundary and mobilize as much boundary shear as possible if it occurs to be influential. We cannot, let's just define 1 moving wall if we want to do it...
+
+
+
+# ---- BOUNDARY CONTROL ---- #
+# the lengths must have been re-defined (v_lx,v_ly,v_lz,v_xy,v_xz,v_yz) in the setup file to correspond to either the wall to wall length or the periodic cell length
+# the pressure must have been re-defined in the setup file to correspond to either the wall or PBC
+# stress calculation regions must also take into account possible smaller regions (e.g. cylinder for oedometric test)
+# the volume must also take into account possible smaller regions (e.g. cylinder for oedometric test)
+
+variable BC_CONTROL equal true # BC control activated
+## Initialization of dummy particles 
+
+variable BC_XX_stiffness atom "1.0 + 1.5*(v_E/(1-v_nu^2))^(2/3)*abs(v_pxx)^(1/3)" # Add 1.0 to prevent divide by zero. atom variable to use fix store/state
+variable BC_YY_stiffness atom "1.0 + 1.5*(v_E/(1-v_nu^2))^(2/3)*abs(v_pyy)^(1/3)" # Add 1.0 to prevent divide by zero. atom variable to use fix store/state. stiffness in YY used for XY
+variable BC_ZZ_stiffness atom "1.0 + 1.5*(v_E/(1-v_nu^2))^(2/3)*abs(v_pzz)^(1/3)" # Add 1.0 to prevent divide by zero. atom variable to use fix store/state. stiffness in ZZ used for XZ and YZ
+
+fix stiffness_BC all store/state 10000 v_BC_XX_stiffness v_BC_YY_stiffness v_BC_ZZ_stiffness # Do not recalculate stiffness every timestep, saves a lot of time !!!
+
+fix BC_control_u0 dummy store/state 0 xu yu zu # Unwrapped position of dummy particle at start of BC controller
+fix BC_control_u1 dummy store/state 1 xu yu zu # Unwrapped position of dummy particle at start of BC controller
+
+variable dXX_BC equal f_BC_control_u1[$(v_id_vBC)][1]-f_BC_control_u0[$(v_id_vBC)][1] # Boundary displacement in XX-direction
+variable dYY_BC equal f_BC_control_u1[$(v_id_vBC)][2]-f_BC_control_u0[$(v_id_vBC)][2] # Boundary displacement in YY-direction
+variable dZZ_BC equal f_BC_control_u1[$(v_id_vBC)][3]-f_BC_control_u0[$(v_id_vBC)][3] # Boundary displacement in ZZ-direction
+
+variable lx0_BC equal $(lx) # Boundary strain-controlled always based on periodic cell
+variable ly0_BC equal $(ly) # Boundary strain-controlled always based on periodic cell
+variable lz0_BC equal $(lz) # Boundary strain-controlled always based on periodic cell
+
+
+## Calculation of the equivalent forces for boundary control
+
+#(1) Volumetric boundary control
+
+if "${BC_XX_STRESS_CONTROLLED}" then &
+"variable fXX_BC equal (mass[$(v_id_vBC)]/dt)*((v_BC_vprev_factor-1.0)*vx[$(v_id_vBC)]+(1.0-v_BC_damping)*v_BC_gain*(v_pxx-v_BC_XX_TARGET)/(f_stiffness_BC[1][1]*dt)*lx)" &
+elif "!${BC_XX_STRESS_CONTROLLED}" &
+"variable fXX_BC equal (mass[$(v_id_vBC)]/dt)*(lx*(exp(v_BC_XX_TARGET-ln(lx/v_lx0_BC))-1.0)/dt-vx[$(v_id_vBC)])" &
+else &
+"print 'Script Error: flag BC_XX_STRESS_CONTROLLED should have value true or false and was given $(v_BC_XX_STRESS_CONTROLLED)'" &
+"quit"
+
+if "${BC_YY_STRESS_CONTROLLED}" then &
+"variable fYY_BC equal (mass[$(v_id_vBC)]/dt)*((v_BC_vprev_factor-1.0)*vy[$(v_id_vBC)]+(1.0-v_BC_damping)*v_BC_gain*(v_pyy-v_BC_YY_TARGET)/(f_stiffness_BC[1][2]*dt)*ly)" &
+elif "!${BC_YY_STRESS_CONTROLLED}" &
+"variable fYY_BC equal (mass[$(v_id_vBC)]/dt)*(ly*(exp(v_BC_YY_TARGET-ln(ly/v_ly0_BC))-1.0)/dt-vy[$(v_id_vBC)])" &
+else &
+"print 'Script Error: flag BC_YY_STRESS_CONTROLLED should have value true or false and was given $(v_BC_YY_STRESS_CONTROLLED)'" &
+"quit"
+
+if "${BC_ZZ_STRESS_CONTROLLED}" then &
+"variable fZZ_BC equal (mass[$(v_id_vBC)]/dt)*((v_BC_vprev_factor-1.0)*vz[$(v_id_vBC)]+(1.0-v_BC_damping)*v_BC_gain*(v_pzz-v_BC_ZZ_TARGET)/(f_stiffness_BC[1][3]*dt)*lz)" &
+elif "!${BC_ZZ_STRESS_CONTROLLED}" &
+"variable fZZ_BC equal (mass[$(v_id_vBC)]/dt)*(lz*(exp(v_BC_ZZ_TARGET-ln(lz/v_lz0_BC))-1.0)/dt-vz[$(v_id_vBC)])" &
+else &
+"print 'Script Error: flag BC_ZZ_STRESS_CONTROLLED should have value true or false and was given $(v_BC_ZZ_STRESS_CONTROLLED)'" &
+"quit"
+
+fix force_volumetric_BC vdummy setforce v_fXX_BC v_fYY_BC v_fZZ_BC # Residual dummy force on volumetric boundaries
+
+
+if "${SHEARRELAX}" then &
+"jump SELF lbl_shear_BC" &
+elif "!${SHEARRELAX}" &
+"jump SELF lbl_noshear_BC" &
+else &
+"print 'Script Error: flag SHEARRELAX should have value true or false and was given $(v_SHEARRELAX)'" &
+"quit"
+
+
+label lbl_shear_BC
+#(2) Shear / Tilt boundary control, gain divided by 10 for shear/tilt to avoid rapid box tilt during initial compaction
+
+variable dXY_BC equal f_BC_control_u1[$(v_id_sBC)][1]-f_BC_control_u0[$(v_id_sBC)][1] # Boundary displacement in XY-direction
+variable dXZ_BC equal f_BC_control_u1[$(v_id_sBC)][2]-f_BC_control_u0[$(v_id_sBC)][2] # Boundary displacement in XZ-direction
+variable dYZ_BC equal f_BC_control_u1[$(v_id_sBC)][3]-f_BC_control_u0[$(v_id_sBC)][3] # Boundary displacement in YZ-direction
+
+if "${BC_XY_STRESS_CONTROLLED}" then &
+"variable fXY_BC equal (mass[$(v_id_sBC)]/dt)*((v_BC_vprev_factor-1.0)*vx[$(v_id_sBC)]+(1.0-v_BC_damping)*v_BC_gain*(v_pxy-v_BC_XY_TARGET)/(f_stiffness_BC[1][2]*dt)*ly)" &
+elif "(!${BC_XY_STRESS_CONTROLLED}) && (${BC_XY_TARGET} < 1e-3) && (${BC_XY_TARGET} > -1e-3)" &
+"variable fXY_BC equal 0.0" &
+else &
+"print 'Script Error: flag BC_XY_STRESS_CONTROLLED should have value true or false and was given $(v_BC_XY_STRESS_CONTROLLED)'" &
+"quit"
+
+if "${BC_XZ_STRESS_CONTROLLED}" then &
+"variable fXZ_BC equal (mass[$(v_id_sBC)]/dt)*((v_BC_vprev_factor-1.0)*vy[$(v_id_sBC)]+(1.0-v_BC_damping)*v_BC_gain*(v_pxz-v_BC_XZ_TARGET)/(f_stiffness_BC[1][3]*dt)*lz)" &
+elif "(!${BC_XZ_STRESS_CONTROLLED}) && (${BC_XZ_TARGET} < 1e-3) && (${BC_XZ_TARGET} > -1e-3)" &
+"variable fXZ_BC equal 0.0" &
+else &
+"print 'Script Error: flag BC_XZ_STRESS_CONTROLLED should have value true or false and was given $(v_BC_XZ_STRESS_CONTROLLED)'" &
+"quit"
+
+if "${BC_YZ_STRESS_CONTROLLED}" then &
+"variable fYZ_BC equal (mass[$(v_id_sBC)]/dt)*((v_BC_vprev_factor-1.0)*vz[$(v_id_sBC)]+(1.0-v_BC_damping)*v_BC_gain*(v_pyz-v_BC_YZ_TARGET)/(f_stiffness_BC[1][3]*dt)*lz)" &
+elif "(!${BC_YZ_STRESS_CONTROLLED}) && (${BC_YZ_TARGET} < 1e-3) && (${BC_YZ_TARGET} > -1e-3)" &
+"variable fYZ_BC equal 0.0" &
+else &
+"print 'Script Error: flag BC_YZ_STRESS_CONTROLLED should have value true or false and was given $(v_BC_YZ_STRESS_CONTROLLED)'" &
+"quit"
+
+fix force_shear_BC sdummy setforce v_fXY_BC v_fXZ_BC v_fYZ_BC # Residual dummy force on shear boundaries
+
+## Definition of the deformation with shear relaxing. Note: the second variable (velocity) in fix deform variable is not used so it is set as the first variable (displacement) to satisfy the command syntax
+
+if "${REMAP}" then &
+"fix controller_BC particles deform 1 x variable v_dXX_BC v_dXX_BC y variable v_dYY_BC v_dYY_BC z variable v_dZZ_BC v_dZZ_BC xy variable v_dXY_BC v_dXY_BC xz variable v_dXZ_BC v_dXZ_BC yz variable v_dYZ_BC v_dYZ_BC remap x flip no" &
+elif "!${REMAP}" &
+"fix controller_BC particles deform 1 x variable v_dXX_BC v_dXX_BC y variable v_dYY_BC v_dYY_BC z variable v_dZZ_BC v_dZZ_BC xy variable v_dXY_BC v_dXY_BC xz variable v_dXZ_BC v_dXZ_BC yz variable v_dYZ_BC v_dYZ_BC remap none flip no" &
+else &
+"print 'Error: variable REMAP should have value true or false and were given $(v_REMAP)'" &
+"quit"
+
+## Time integration of the dummy particles
+
+fix time_integration_BC dummy nve/limit $(0.33*(lx+ly+lz)*dt*v_ratemax) # Time integration of volumetric and shear boundaries with velocity/strain rate limit 
+
+jump SELF lbl_end_BC # Skip the boundary control definition with no shear
+
+
+
+
+
+
+label lbl_noshear_BC
+
+## Definition of the deformation. Note: the second variable (velocity) in fix deform variable is not used so it is set as the first variable (displacement) to satisfy the command syntax
+
+if "${REMAP}" then &
+"fix controller_BC particles deform 1 x variable v_dXX_BC v_dXX_BC y variable v_dYY_BC v_dYY_BC z variable v_dZZ_BC v_dZZ_BC remap x flip no" &
+elif "!${REMAP}" &
+"fix controller_BC particles deform 1 x variable v_dXX_BC v_dXX_BC y variable v_dYY_BC v_dYY_BC z variable v_dZZ_BC v_dZZ_BC remap none flip no" &
+else &
+"print 'Error: variable REMAP should have value true or false and were given $(v_REMAP)'" &
+"quit"
+
+## Time integration of the volumetric dummy particle
+
+fix time_integration_BC vdummy nve/limit $(0.33*(lx+ly+lz)*dt*v_ratemax) # Time integration of volumetric and shear boundaries with velocity/strain rate limit 
+
+label lbl_end_BC

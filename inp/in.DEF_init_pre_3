@@ -1,0 +1,25 @@
+# LAMMPS INPUT FILE DEFINING THE INITIALIZATION PARAMETERS OF LAMMPS (BEFORE read_restart COMMAND) FOR 3D GRANULAR SIMULATIONS
+# file: in.DEF_init_pre_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 09/12/2019
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME WHEN RESTART FILES ARE NOT YET DEFINED
+# ALL INFORMATION/COMMANDS PRESENT IN THIS SCRIPT ARE SAVED IN RESTART FILES
+# INFORMATION/COMMANDS NOT SAVED IN RESTART FILES BY LAMMPS (newton pair, neigh_modify, neighbor) RE DEFINED IN THE 'POST' DEF SCRIPT: in.DEF_init_post_3
+# SEE LIST OF INFORMATION SAVED IN RESTART FILES: https://lammps.sandia.gov/doc/read_restart.html)
+#
+# INFO :
+# - MUST BE CALLED FIRST OVERALL IN THE MAIN SCRIPT (WHEN NEEDED)
+#
+# TODO:
+# - 
+# - 
+
+# ---- LAMMPS SIMULATION SETUP ---- #
+
+units si # SI units kg, m, s
+dimension 3 # 3D systems
+boundary p p p # Periodic Boundary Conditions, always used even if walls: walls mapped to periodic cell
+atom_style sphere # Use spherical particles or clumps of spherical particles
+comm_modify	vel yes # Necessary for granular simulations
+atom_modify map yes # Necessary for indexing purposes

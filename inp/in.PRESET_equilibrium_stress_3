@@ -1,0 +1,21 @@
+# LAMMPS INPUT FILE DEFINING THE VALUES FOR EQUILIBRATION OF THE STRESS ONLY FOR 3D GRANULAR SYSTEMS
+# file: in.PRESET_equilibrium_stress_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 07/30/2019
+#
+# THIS IS A PRESET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND ARE LOCALLY REDEFINED ACCORDING TO PRESET VALUES
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
+# PRESET SCRIPT MUST BE CALLED BEFORE THE CORRESPONDING START SCRIPT
+#
+#
+# INFO:
+# - SETS LARGE TOLERANCE FOR NON-STRESS VARIABLES THAT ARE NOT EQUILIBRATED
+#
+# TODO:
+# - 
+# - 
+
+variable tolke equal 1e20 # Very large value, always verified
+variable tolfres equal 1e20 # # Very large value, always verified
+variable toltqres equal 1e20 # # Very large value, always verified
+variable tolufr equal 1e20 # # Very large value, always verified
+variable tolp 	equal 1e-4 # Relative tolerance on the pressure [Suiker 2004]

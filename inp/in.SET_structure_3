@@ -1,0 +1,55 @@
+# LAMMPS INPUT FILE SETTING UP AND DEFINING THE STRUCTURES OF THE 3D GRANULAR SYSTEMS
+# file: in.SET_structure_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 09/12/2019
+#
+# THIS IS A SET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT MUST NOT BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+# THIS SCRIPT SHOULD NOT BE MODIFIED
+#
+#
+# INFO :
+# - MUST BE CALLED AFTER ALL DEF SCRIPTS
+# - MUST BE CALLED BEFORE in.SET_boundary_3 SCRIPT
+# - MUST BE CALLED BEFORE in.SET_macro_properties_3 SCRIPT
+# - MUST BE CALLED BEFORE in.SET_conv_3 SCRIPT
+#
+# TODO:
+# - STREAMLINE AND CLEAR OUT WHAT WE REALLY NEED e.g backbone, rattlers contribution, etc
+# - 
+
+
+# ---- DUMMY PARTICLES FOR BOUNDARY CONTROL ---- #
+
+group particles type 1 3 # Group of all real atoms
+group centers type 1 # Group of the center of the clumps, for spherical particles, this group is identical as particles
+group dummy type 2 # Group of dummy atoms used for boundary control
+
+variable Natoms equal $(count(all)-2) # Number of real atoms
+variable Nparticles equal $(count(centers)) # Number of real particles, for spherical particles, this number is identical as Natoms
+variable id_vBC equal "v_Natoms+1" # Atom ID of the dummy atom used for volumetric boundary control. This only works if ID are numbered consecutively and the LAMMPS map corresponds to it, which LAMMPS should automatically do
+variable id_sBC equal "v_Natoms+2" # Atom ID of the dummy atom used for shear/tilt boundary control. This only works if ID are numbered consecutively and the LAMMPS map corresponds to it, which LAMMPS should automatically do
+group vdummy id ${id_vBC} # Group of dummy atom used for volumetric boundary control
+group sdummy id ${id_sBC} # Group of dummy atom used for shear/tilt boundary control
+
+# ---- BACKBONE / RATTLERS / DENSITY ---- #
+
+compute zatom particles contact/atom # Number of contacts per atom
+if "${SPHERE}" then &
+"variable zfloat atom 'c_zatom == 0' # Floating particles with no contact" &
+elif "!${SPHERE}" &
+"compute chunk_clump particles chunk/atom molecule nchunk once ids once compress yes # Assign chunk ID to molecule in order to obtain per-clump properties" &
+"compute com_clump particles com/chunk chunk_clump # Center of mass of the clump. c_com_chunk[clump id][x=1,y=2,z=3]. per-clump" &
+"compute coordu_particles particles property/atom xu yu zu # Unwrapped coordinated of all atoms" &
+"compute com_clump_global particles global/atom c_chunk_clump c_com_clump[*] # Center of mass of clumps mapped back to the atoms. per-atom vector" &
+"compute zclump particles reduce/chunk chunk_clump sum c_zatom # per-clump number of contact" &
+"compute zparticles_spread particles chunk/spread/atom chunk_clump c_zclump # Real number of contact per chunk spread back onto atoms (coordination number z of clump the atom belongs to)" &
+"variable zfloat atom 'c_zparticles_spread == 0' # atoms in floating clumps with no contact" &
+else &
+"print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" &
+"quit"
+group floaters dynamic particles var zfloat every 1 # Dynamic group of atoms in floating particles, with exactly zero contacts
+compute zsum particles reduce sum c_zatom # Total number of contacts between atoms
+compute zmax particles reduce max c_zatom # max number of contacts between atoms
+
+
+compute temp_sphere particles temp/sphere # sphere DOFs in thermodynamic quantities

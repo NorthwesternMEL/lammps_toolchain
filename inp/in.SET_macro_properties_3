@@ -1,0 +1,41 @@
+# LAMMPS INPUT FILE SETTING UP AND DEFINING THE MACROSCOPIC/HOMOGENIZED PROPERTIES OF THE 3D GRANULAR SYSTEMS
+# file: in.SET_macro_properties_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 09/12/2019
+#
+# THIS IS A SET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT MUST NOT BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+# THIS SCRIPT SHOULD NOT BE MODIFIED
+#
+#
+# INFO :
+# - MUST BE CALLED AFTER ALL DEF SCRIPTS
+# - MUST BE CALLED AFTER in.SET_structure_3 SCRIPT
+# - MUST BE CALLED AFTER in.SET_boundary_3 SCRIPT
+# - MUST BE CALLED BEFORE in.SET_conv_3 SCRIPT
+#
+# TODO:
+# - STREAMLINE AND CLEAR OUT WHAT WE REALLY NEED e.g backbone, rattlers contribution, etc
+# - 
+
+
+# ---- PACKING DENSITY ---- #
+
+compute dparticles centers property/atom diameter # Diameter of the center atoms, to work with both spheres and clumps
+variable dpcub atom c_dparticles^3
+compute dsumcub centers reduce sum v_dpcub # Sum of diameters cubed, used to calculate packing fraction in 3D
+variable pf equal "PI*c_dsumcub*v_aspectratio_particles/(6*v_vol)" # Packing fraction in 3D
+variable voidratio equal "1.0/v_pf - 1.0" # Void ratio
+
+# ---- HOMOGENIZED STRESS ---- #
+
+compute stressparticles particles stress/atom NULL pair # Compute per-atom stress from pair interaction, excluding velocity component
+compute stress particles reduce sum c_stressparticles[1] c_stressparticles[2] c_stressparticles[3] c_stressparticles[4] c_stressparticles[5] c_stressparticles[6] # Compute pressure excluding dummy particles otherwise automatically tallied for in thermo quantities pxx, pyy etc
+
+variable       pxx equal -c_stress[1]/v_vol
+variable       pyy equal -c_stress[2]/v_vol
+variable       pzz equal -c_stress[3]/v_vol
+variable       pxy equal -c_stress[4]/v_vol
+variable       pxz equal -c_stress[5]/v_vol
+variable       pyz equal -c_stress[6]/v_vol
+variable	     press equal "(v_pxx+v_pyy+v_pzz)/3" # Mean stress
+variable	     qdev equal "sqrt(0.5*((v_pxx-v_pyy)^2 + (v_pyy-v_pzz)^2 + (v_pzz-v_pxx)^2))" # Deviatoric stress q = sqrt(3*J_2)

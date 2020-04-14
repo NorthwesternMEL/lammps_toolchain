@@ -1,0 +1,55 @@
+** General script files for LAMMPS granular simulations:
+
+The scripts contained in this folder are meant to be used with the modified version of LAMMPS developed by Jibril B. Coulibaly for the MEL @ NU
+Download and installation instructions are given in the README_LAMMPS.txt file
+
+DEF scripts : Define variables and default values. Must be called once and values can be overwritten locally
+START / STOP scripts: Define an action e.g. boundary control that can be started and stopped at selected moments.
+SET scripts : Creates specific setup, e.g,. boundaries, granular structures, convergence
+MAIN scripts : Perform the main tasks : deposition, loading
+RUN scripts : perform small repetitive runs, e.g., 1 step of heating/cooling
+
+
+
+
+
+* Classical order of script calling within a MAIN script:
+
+DEF scripts
+(1) DEF_init_pre
+(2) DEF_initi_particles
+(3) DEF_param_material
+(4) DEF_param_simulation
+(5) DEF_param_BC_control (wherever among DEF scripts)
+(6) DEF_param_equilibrium
+
+
+() DEF_init_post
+
+
+SET scripts
+(1) SET_boundary
+(2) SET_structure
+(3) SET_conv
+
+
+
+
+
+
+
+Dummy particles are created during the deposition/creation phase and are not to be defined again after that.
+
+
+
+
+
+** Clumps :
+
+We use molecule files for clumps, because we cannot alter the property of the rigid body after it is built, the density must be set manually before each run. Another option would be to write the moleucle file from LAMMPS based on a global clump creation file with labels etc: very nice and very doable. TO DO NEXT
+We must use the infile keyword to get the mass and inertia right in the fix rigid command
+
+The aggregated properties for hybrid molecular and sphere are not determined based on the input values but based on the calculation for spheres. As a result we must perform least-squares to obtain the correct particles mass when clumping spheres together because this is how LAMMPS computes the rigid body dynamic properties.
+clumps have a type 3 atom located in their center so as to more easily identify them
+
+When using clumps we use the following terminology: an atom is a LAMMPS atom and a particle is the clump, the actual granular particle. When using sphere, atoms and particles are the same

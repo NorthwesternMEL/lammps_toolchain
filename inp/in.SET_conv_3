@@ -1,0 +1,111 @@
+# LAMMPS INPUT FILE SETTING UP AND DEFINING THE EQUILIBRIUM AND CONVERGENCE INFORMATION OF THE 3D GRANULAR SYSTEMS
+# file: in.SET_conv_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, 09/12/2019
+#
+# THIS IS A SET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT MUST NOT BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+# THIS SCRIPT SHOULD NOT BE MODIFIED
+#
+#
+# INFO :
+# - MUST BE CALLED AFTER ALL DEF SCRIPTS
+# - MUST BE CALLED AFTER in.SET_boundary_3 SCRIPT
+# - MUST BE CALLED AFTER in.SET_structure_3 SCRIPT
+# - WHEN USING CLUMPS, THE FIX RIGID MUST ALREADY BE DEFINED BEFORE CALLING THIS PRESENT SCRIPT
+#
+# TODO:
+# - convergence on strain ?
+# - Better organization than label and jump SELF ? There are subtle differences like max force that is compute or variable depending on the case that maybe makes doig this too annoying
+
+# ---- CONVERGENCE INFO ---- #
+
+if "${SPHERE}" then "jump SELF lbl_sphere_conv" &
+elif "!${SPHERE}" "jump SELF lbl_ellipsoid_conv" &
+else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
+
+#################################
+# ---- SPHERICAL PARTICLES ---- #
+#################################
+
+label lbl_sphere_conv
+
+## Convergence on kinetic energy
+
+compute ketr particles ke # Translational kinetic energy
+compute kerot particles erotate/sphere # Rotational kinetic energy
+variable convke equal "(c_ketr+c_kerot)/(v_Nparticles*v_Fsys*v_dsys)" # Convergence condition on the average kinetic energy of the particles [Radjai Dubois]
+
+## Convergence on maximum force residual
+
+variable fres atom "sqrt(fx*fx + fy*fy + fz*fz)"
+compute fresmax particles reduce max v_fres # maximum force on particles
+variable convfres equal "c_fresmax/v_Fsys" # Convergence condition on the absolute force residual [Radjai Dubois]
+
+## Convergence on maximum torque residual
+
+compute torques particles property/atom tqx tqy tqz # Compute torques on particles
+variable tqres atom "sqrt(c_torques[1]*c_torques[1] + c_torques[2]*c_torques[2] + c_torques[3]*c_torques[3])"
+compute tqresmax particles reduce max v_tqres # maximum torque on particles
+variable convtqres equal "c_tqresmax/v_Tqsys" # Convergence condition on the absolute torque residual [Radjai Dubois]
+
+## Convergence on unbalanced force ratio UFR
+
+compute fcon particles pair/local force p4 # normal force magnitude, tangent force magnitude
+compute nfcon particles reduce sum c_fcon[1] # Sum of normal force
+compute tfcon particles reduce sum c_fcon[2] # Sum of tangent force
+variable fconsum equal "sqrt(c_nfcon^2 + c_tfcon^2)" # Compute lower bound of sum of contact force (cannot do operations on local vectors in LAMMPS...)
+compute fresave particles reduce ave v_fres # Compute average of residual force
+variable convufr equal "(c_fresave)/(2*(v_fconsum+v_Fsys*1e-6)/(1+c_zsum))" # Convergence condition on the unbalanced force ratio [Ng 2006]. Add one in the number of contacts and add a tiny force in the sum of contact forces to avoid division by zero. should have very limited influence in large systems with high number of contacts
+
+jump SELF lbl_end_conv # skip the convergence definition for ellipsoid particles
+
+#################################
+# ---- ELLIPSOID PARTICLES ---- #
+#################################
+
+label lbl_ellipsoid_conv
+
+## Convergence on kinetic energy
+
+compute ketr particles ke/rigid time_integration_clumps
+compute kerot particles erotate/rigid time_integration_clumps
+variable convke equal "(c_ketr+c_kerot)/(v_Nparticles*v_Fsys*v_dsys)" # Convergence condition on the average kinetic energy of the particles [Radjai Dubois]
+
+## Convergence on maximum force residual
+
+compute fparticles particles property/atom fx fy fz # forces on particles
+fix fclump particles ave/chunk ${Ncheck} 1 ${Ncheck} chunk_clump c_fparticles[*] norm none # Calculates the sum of forces per-clump. Output [Nchunk][values start at 3 to 3 + Nvariable], f_[N] outputs Nth column
+variable fres_clump vector sqrt(f_fclump[3]*f_fclump[3]+f_fclump[4]*f_fclump[4]+f_fclump[5]*f_fclump[5])
+variable fresmax_clump equal max(v_fres_clump) # maximum residual force on clumps
+variable convfres equal "v_fresmax_clump/v_Fsys" # Convergence condition on the absolute force residual [Radjai Dubois]
+
+## Convergence on maximum torque residual
+
+compute tq_clump particles rigid/local time_integration_clumps tqx tqy tqz
+compute tqresmax_dir particles reduce max c_tq_clump[*] # maximum torque on particles in each direction: upper bound but only way to obtain the information from rigid/small. Should not be larger than about sqrt(3) times the actual maximum torque
+variable tqresmax equal "sqrt(c_tqresmax_dir[1]*c_tqresmax_dir[1] + c_tqresmax_dir[2]*c_tqresmax_dir[2] + c_tqresmax_dir[3]*c_tqresmax_dir[3])"
+variable convtqres equal "v_tqresmax/v_Tqsys" # Convergence condition on the absolute torque residual [Radjai Dubois]
+
+
+## Convergence on unbalanced force ratio UFR
+
+compute fcon particles pair/local force p4 # normal force magnitude, tangent force magnitude
+compute nfmax particles reduce max c_fcon[1]
+compute nfcon particles reduce sum c_fcon[1] # Sum of normal force
+compute tfcon particles reduce sum c_fcon[2] # Sum of tangent force
+variable fconsum equal "sqrt(c_nfcon^2 + c_tfcon^2)" # Compute lower bound of sum of contact force (cannot do operations on local vectors in LAMMPS...)
+variable fresave equal ave(v_fres_clump) # average residual force on clumps
+variable convufr equal "(v_fresave)/(2*(v_fconsum+v_Fsys*1e-6)/(1+c_zsum))" # Convergence condition on the unbalanced force ratio [Ng 2006]. Add one in the number of contacts and add a tiny force in the sum of contact forces to avoid division by zero. should have very limited influence in large systems with high number of contacts
+
+
+
+label lbl_end_conv
+
+## Convergence on pressure
+
+variable convpxx equal "abs(v_pxx/v_BC_XX_TARGET - 1)" # Relative pressure in xx direction compared to the target pressure
+variable convpyy equal "abs(v_pyy/v_BC_YY_TARGET - 1)" # Relative pressure in yy direction compared to the target pressure
+variable convpzz equal "abs(v_pzz/v_BC_ZZ_TARGET - 1)" # Relative pressure in zz direction compared to the target pressure
+variable convpxy equal "abs((v_pxy-v_BC_XY_TARGET)/v_P0)" # Relative shear in xy direction compared to the target pressure (shear is often targeted to be zero, cannot compute quantities relative to zero. Have to use P0 because target values in XX, YY, ZZ could be zero e.g. oedometric. temporary but works)
+variable convpxz equal "abs((v_pxz-v_BC_XZ_TARGET)/v_P0)" # Relative shear in xz direction compared to the target pressure (shear is often targeted to be zero, cannot compute quantities relative to zero. Have to use P0 because target values in XX, YY, ZZ could be zero e.g. oedometric. temporary but works)
+variable convpyz equal "abs((v_pyz-v_BC_YZ_TARGET)/v_P0)" # Relative shear in yz direction compared to the target pressure (shear is often targeted to be zero, cannot compute quantities relative to zero. Have to use P0 because target values in XX, YY, ZZ could be zero e.g. oedometric. temporary but works)
