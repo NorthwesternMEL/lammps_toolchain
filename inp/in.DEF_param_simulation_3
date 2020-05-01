@@ -12,7 +12,7 @@
 # - THE INFORMATION IS VALID FOR SPHERES AND REVOLUTION ELLIPSOIDS (a=b)
 #
 # TODO:
-# - 
+# - We should use multiple levels of each of the Nthermo, Nmax, Ncheck etc, like short, middle long ?
 # - 
 
 # ---- DEM PARAMETERS ---- #
@@ -44,9 +44,9 @@ variable damp0particles equal 0.2 # Damping ratio for particles using Cundall/Ya
 variable visc0particles equal 0.01 # Viscous damping ratio
 
 # ---- RUN AND OUTPUT PARAMETERS ---- #
-
+# 
 variable Nrun equal 100000 # Number of timestep of a classic run (ramps, etc)
 variable Nmax equal 10000000 # Maximum number of timesteps during a run
-variable Ncheck equal 1000 # Frequency of equilibrium checks, dynamic group redefinition etc
+variable Ncheck equal 10000 # Frequency of equilibrium checks, dynamic group redefinition etc
 variable Nthermo equal 50000 # Frequency of thermo output
 variable Ndump equal 10000 # Frequency of dump output

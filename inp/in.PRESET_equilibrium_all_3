@@ -14,8 +14,8 @@
 # - 
 # - 
 
-variable tolke equal 1e-8 # Relative tolerance on the average kinetic energy [Radaji Dubois 2011]
-variable tolfres equal 1e-4 # Relative tolerance on the force residual [Radaji Dubois 2011] recommended 1e-4 by Agnolin but too strong in polydisperse
-variable toltqres equal 1e-4 # Relative tolerance on the torque residual
-variable tolufr equal 1e-5 # Tolerance on the unbalanced force ratio [Wautier,Zhao2016] use 1e-5
-variable tolp 	equal 1e-4 # Relative tolerance on the pressure [Suiker 2004]
+variable tolke equal ${tolke0}
+variable tolfres equal ${tolfres0}
+variable toltqres equal ${toltqres0}
+variable tolufr equal ${tolufr0}
+variable tolp 	equal ${tolp0}

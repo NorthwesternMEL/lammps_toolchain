@@ -7,3 +7,5 @@ PSDtemplate/
 
 log.*
 dump.*
+data.*
+restart.*

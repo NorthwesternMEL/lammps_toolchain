@@ -25,8 +25,7 @@ include in.DEF_init_material_3
 
 # ---- DEFINITION OF THE PARAMETERS ---- #
 #
-#include in.DEF_param_material_3
-include in.DEF_param_sample_3
+include in.DEF_param_sample_preparation_3
 include in.DEF_param_simulation_3
 include in.DEF_param_BC_control_3
 include in.DEF_param_equilibrium_3
@@ -37,12 +36,6 @@ include in.DEF_init_post_3
 variable Nx equal $(round((v_Ntarget/v_aspectratio)^(1/3))) # Number of particles in horizontal directions X and Y
 variable Nz equal $(v_aspectratio*v_Nx) # Number of particles in vertical direction Z
 variable Nparticles equal "v_Nx*v_Nx*v_Nz" # Number of clumps in the simulation
-
-# ---- PERIODIC v.s. WALLS ---- #
-#
-variable BC_XX_WALL equal false # Overwrite default, creates PBC
-variable BC_YY_WALL equal false # Overwrite default, creates PBC
-variable BC_ZZ_WALL equal false # Overwrite default, creates PBC
 
 # ---- DEFINITION OF THE ORTHOGONAL CELL ---- #
 #
@@ -81,7 +74,7 @@ set type 2 mass $(v_Nparticles^(2/3)*v_msys) # mass of boundary = Approximate ma
 # ---- SETUP OF THE BOUNDARY CONDITIONS, STRUCTURES, RIGID BODIES (if clumps), POLYDISPERSITY AND CONVERGENCE ---- #
 #
 
-variable READWALL equal false # determine wall coordinates from current box dimensions and wall padding
+variable READWALL equal false # determine wall coordinates from current box dimensions and wall padding: Hardcoded here to avoid wrong values from passed arguments
 include in.SET_structure_3
 include in.SET_boundary_3
 include in.SET_macro_properties_3
@@ -117,15 +110,6 @@ else "print 'Script Error: flag SPHERE should have value true or false and was g
 
 include in.SET_conv_3
 
-dump 1 particles custom 5000 dump.co_test.lammpstrj id x y z diameter mass mol
-dump 2 dummy custom 5000 dump.co_dummy.lammpstrj id x y z diameter fx fy fz mol
-
-
-
-
-
-
-
 
 #################################
 # ---- MIXING OF PARTICLES ---- #
@@ -140,20 +124,20 @@ if "${pf} > ${pfmin}" then "change_box all x scale $((v_pf/v_pfmin)^(1/3)) y sca
 ## MIXING
 
 fix pos0 centers store/state 0 x y z
-fix pos1 centers store/state 1 xu yu zu # no need since no one crosses ?
+fix pos1 centers store/state ${Ncheck} xu yu zu # should I store ever Ncheck?
 variable travel atom " sqrt((f_pos0[1]-f_pos1[1])^2 + (f_pos0[2]-f_pos1[2])^2 + (f_pos0[3]-f_pos1[3])^2)/v_dsys"
 compute pos2 centers reduce ave v_travel # Displacement of particle relative to its diameter
 
-variable mixamount equal 5.0
-variable haltmix equal "c_pos2 >= v_mixamount" # Average particle travel x times its diameter, depends on PBC or WALL, less movement with walls
-fix stopmix all halt 10000 v_haltmix == 1 error continue
+variable haltmix equal "c_pos2 >= v_mixamount" 
+fix stopmix all halt ${Ncheck} v_haltmix == 1 error continue
 
-velocity particles create $(1e3*v_msys*((v_dsys/1e4)/v_tsyshertz)^2/(3*1.380e-23)) ${mixseed} temp temp_sphere # Temperature based on gas kinetic theory T=mv^2/3kb (Boltzmann constant kb=1.380e-23), v based on overlap = d/1e4 (arbitrary, small) and characteristic time
+variable mixtemp equal $(v_msys*(v_mixintensity*v_dsys/v_tsyshertz)^2/(3*1.380e-23)) # Equivalent temperature for average mixing velocity based on gas kinetic theory T=mv^2/3kb (Boltzmann constant kb=1.380e-23)
+velocity particles create ${mixtemp} ${mixseed} temp temp_sphere
 run 0
-velocity particles scale $(1e3*v_msys*((v_dsys/1e4)/v_tsyshertz)^2/(3*1.380e-23)) temp temp_sphere
+velocity particles scale ${mixtemp} temp temp_sphere
 thermo_style custom step c_pos2
-thermo 10000
-run 10000000
+thermo ${Nthermo}
+run ${Nmax} # will be stopped when mixing criterion met
 
 unfix pos0
 unfix pos1
@@ -162,8 +146,7 @@ variable haltmix delete
 unfix stopmix
 variable mixamount delete
 
-variable expansion equal 0.01 # We stop when average indentation (Kappa^-1 = h/d) is smaller than 0.001 [Agnolin 2007] uses 0.005 to remap, we do the same but use a smaller criterion for convergence before making a bigger remap using 0.005
-change_box all x scale $(1+5*v_expansion) y scale $(1+5*v_expansion) z scale $(1+5*v_expansion) remap units box # Expansion multiplied by 5 to make sure there is no contact left
+change_box all x scale $(1+v_contact_expansion) y scale $(1+v_contact_expansion) z scale $(1+v_contact_expansion) remap units box # Uniform expansion to make sure there is no contact left
 velocity all set 0.0 0.0 0.0
 
 
@@ -178,16 +161,16 @@ else "print 'Script Error: flag SPHERE should have value true or false and was g
 
 ## PERCOLATION SHRINKAGE 
 
-variable In0 equal 1e-1 # Overwrite the inertial number to large values for percolation
+variable In0 equal ${In0_percolation} # Overwrite the inertial number to large values for percolation
 fix percolation particles deform 1 x trate -${ratemax} y trate -${ratemax} z trate -${ratemax} remap x
 
 variable haltpercolation equal "v_pf > v_pf0" # Run halted when desired packing reached
-fix stoppercolation all halt 1 v_haltpercolation == 1 error continue
+fix stoppercolation all halt 1 v_haltpercolation == 1 error continue # Shrinkage is very quick, muste be checked for convergence every timestep to avoid high overlap 
  
 thermo_style custom step temp ke press v_pf
 thermo_modify temp temp_sphere # take into account sphere DOFs
-thermo 10000
-run 10000000 # Large run that will be stopped by fix halt 
+thermo ${Nthermo} # Normalize
+run ${Nmax} # will be stopped when good packing fraction reached 
 
 velocity all set 0.0 0.0 0.0
 unfix percolation
@@ -196,35 +179,35 @@ variable haltpercolation delete
  
 ## RELAXING TO A STATE WITH NO CONTACT AND SIMILAR PACKING FRACTION
 
-variable expansion equal 0.001 # We stop when average indentation (Kappa^-1 = h/d) is smaller than 0.001 [Agnolin 2007] uses 0.005 to remap, we do the same but use a smaller criterion for convergence before making a bigger remap using 0.005
-variable Plim equal "(v_E/(1-v_nu^2))*(v_expansion^(3/2))" # Limit pressure corresponding to the indentation, determined from indentation and material properties using stiffness number formula
-variable haltrelax equal "press < v_Plim"
-fix relax all halt 10000 v_haltrelax == 1 error continue # The frequency of that fix must match that of the thermo for pressure to be tallied on the right timestep
+variable Plim equal "(v_E/(1-v_nu^2))*(v_relax_overlap^(3/2))" # Limit pressure corresponding to the overlap, determined from overlap and material properties using stiffness number formula
+variable haltrelax equal "press < v_Plim" # Why we use press and not v_press ?
+fix relax all halt ${Ncheck} v_haltrelax == 1 error continue # variable hatlrelax called *during* the run so frequency of that fix has no pressure to be tallied timestep requirements
 
-thermo 10000 # The frequency of that thermo must match that of the fix halt for pressure to be tallied on the right timestep
-run 1000000
- 
+thermo ${Nthermo} # That thermo must invoke pressure for fixhalt to work
+run ${Nmax} # will stop when average overlap is met
+
 unfix relax
-
-change_box all x scale $(1+5*v_expansion) y scale $(1+5*v_expansion) z scale $(1+5*v_expansion) remap units box # Expansion multiplied by 5 to make sure there is no contact left
-velocity all set 0.0 0.0 0.0
-set group all omega 0.0 0.0 0.0
-run 10000 # Visual verification that all contacts have been separated
-
 variable haltrelax delete
 variable Plim delete
 variable expansion delete
+
+change_box all x scale $(1+5*v_relax_overlap) y scale $(1+5*v_relax_overlap) z scale $(1+5*v_relax_overlap) remap units box # Expansion multiplied by 5 to make sure there is no contact left
+velocity all set 0.0 0.0 0.0
+set group all omega 0.0 0.0 0.0
+run ${Nthermo} # Use a to be / newly defined Nshort? Visual verification in thermo output that all contacts have been separated (no pressure, no kinetic energy)
+
  
 ##########################################################
 # ---- ISOTROPIC COMPRESSION TO THE TARGET PRESSURE ---- #
 ##########################################################
 
 pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} $f # Contact law with friction for final assembly
-variable BC_vprev_factor equal 0.95 # 
+
 ## First run, equilibrate pressure
 
-variable In0 equal 1e-2 # Overwrite the inertial number to smaller value for compression, this is sufficient to stabilize pressure when remapping is used
-variable REMAP equal true # Initial compaction using remapping to ensure homogeneous compaction
+variable In0 equal ${In0_pressure} # Overwrite the inertial number to smaller value for compression
+variable remap_save equal $(v_REMAP) # Save the value of REMAP passed to the script for later use
+variable REMAP equal true # Initial compaction akways using remapping to ensure homogeneous compaction
 
 variable SHEARRELAX equal false # No shear/tilt relax - orthogonal box
 include in.PRESET_BC_control_ISO_3 # preset isotropic conditions to target pressure
@@ -239,24 +222,15 @@ run ${Nmax} # Will be stopped at equilibrium
 
 ## Second run, equilibrate system
 
-variable In0 equal 1e-3 # Overwrite the inertial number to small value for equilibration
-
-if "${BC_XX_WALL} && ${BC_YY_WALL} && ${BC_ZZ_WALL}" then &
-"variable REMAP equal false # Final equilibration without remapping if walls" &
-elif "!${BC_XX_WALL} && !${BC_YY_WALL} && !${BC_ZZ_WALL}" &
-"variable REMAP equal true # Final equilibration with remapping if PBC" &
-else &
-"print 'Script Error: boundaries must either all be periodic or all have walls. Flags BC_AXIS_WALL were given $(v_BC_XX_WALL), $(v_BC_YY_WALL) and $(v_BC_ZZ_WALL)'" &
-"quit"
-# ------------------------- THIS DOES NOT DO AYTHING UNLESS THE BC_CONTROL IS STOPPPED AND STARTED. THE REMAP OPTION GOES INTO THE FIX DEFORM SO IF IT IS NOT REDEFINED, NOTHING HAPPENS
+variable In0 equal ${In0_equilibrium} # Overwrite the inertial number to small value for equilibration
+variable REMAP equal $(v_remap_save) # Retrieve remapping value passed to script
 
 include in.PRESET_equilibrium_all_3 # Sets equilibrium conditions on all variables
-include in.STOP_BC_control_3  # Must do stop / start to change the remapping properties
+include in.STOP_BC_control_3 # Must do stop / start to change the remapping properties
 include in.START_BC_control_3
 if "${SPHERE}" then "fix damping_floaters_visct floaters viscous $(v_visc0particles*2*sqrt(v_msys*v_hertzstiff))" "fix damping_floaters_viscr floaters viscous/sphere $(v_visc0particles*0.5*v_dsys^2*sqrt(2*v_msys*v_hertzstiff_rot/5))" &
 elif "!${SPHERE}" "fix damping_floaters floaters viscous/rigid time_integration_clumps $(v_visc0particles*2*sqrt(v_msys*v_hertzstiff)) $(v_visc0particles*0.5*v_dsys^2*sqrt(2*v_msys*v_hertzstiff_rot/5))" &
 else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
-
 
 thermo_style custom step v_convke v_convufr v_convfres v_convtqres v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz v_pf
 thermo ${Nthermo}
@@ -288,7 +262,7 @@ dump savedmpcoor particles custom 1 dump.co_sample_3.lammpstrj id x y z diameter
 dump_modify savedmpcoor sort id
 
 compute savepair particles property/local patom1 patom2 # pairs of particles within force cutoff
-compute savecontact particles pair/local dist force p4 p10 p11 p12 # interparticle distance, normal force magnitude, tangent force magnitude, branch vector x, y, z
+compute savecontact particles pair/local force p4 p10 p11 p12 # interparticle distance, normal force magnitude, tangent force magnitude, branch vector x, y, z
 dump savedmptopo particles local 1 dump.topo_sample_3.lammpstrj c_savepair[*] c_savecontact[*]
 
 run 0 # To output final coordinates and neighbor list

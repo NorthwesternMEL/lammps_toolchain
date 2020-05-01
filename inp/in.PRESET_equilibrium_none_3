@@ -15,7 +15,7 @@
 # - 
 
 variable tolke equal 1e-20 # Very large value, always verified
-variable tolfres equal 1e-20 # # Very large value, always verified
-variable toltqres equal 1e-20 # # Very large value, always verified
-variable tolufr equal 1e-20 # # Very large value, always verified
-variable tolp 	equal 1e-20 # Relative tolerance on the pressure [Suiker 2004]
+variable tolfres equal 1e-20 # Very large value, always verified
+variable toltqres equal 1e-20 # Very large value, always verified
+variable tolufr equal 1e-20 # Very large value, always verified
+variable tolp 	equal 1e-20 # Very large value, always verified
