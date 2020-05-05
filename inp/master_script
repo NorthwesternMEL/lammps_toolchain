@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+
+# Script for performing LAMMPS simulations
+# This allows to pass the relevant parameters to the LAMMPS input files to
+# avoid input files manipulation.
+# Can be seen as the 'input file of inpute files', a layer to run clean jobs
+#
+# Input files performing a given task, e.g., sample preparation are only
+# modified if there is a need for a new implementation. Preparing different
+# samples is done by using the present scripts and passing different arguments
+# to the dedicated LAMMPS input file that remains unchanged.
+#
+# This is safer, this is cleaner, and long overdue
+# It might seem like a hassle to have a script full of parameters populating an
+# input file full of parameters. If one wants the changes, they could change the
+# input file directly. The issue with this is that it becomes difficult to run
+# multiple instances of LAMMPS at the same time without corrupting and
+# overwriting data written by another instance. Providing a path to output the
+# files is the minimum requirement to avoid overwriting files and we need a
+# script to do that. We likely don't want to run 2 identicla instances, so we
+# also need to be able to pass different parameters, e.g. diameters, pressures.
+# These are not passed directly to LAMMPS, but to the input files. If we hard-
+# code input files, we need to modify them each time we want different
+# parameters of a similar simulation. It becomes hard for version control.
+# Although some layers will look very similar: e.g., an input file with only
+# parameters will be populated by a script with only parameters. This layer
+# of abstraction is necessary to keep things clean. Once in place we wouldn't
+# be thinking about what is in these parameter input files, but just use lists
+# of parameters in the scripts to run the simulation that we want to perform.
+# We have to think about our LAMMPS input files as "our code". And to think
+# about the present scripts as the input files for "our code".
+#
+# Everything is ran by passing variable argument to LAMMPS by command-line
+# using the -var switch
+#
+# The scripts are written in bash. This is out of generality to be able to
+# perform the simulations both in Windows platforms that have consoles that
+# can run bash, and on GNU/Linux platform or WSL where bash is default/native
+#
+#
+# =============================================================================
+#
+
+
+# Path to 'inp' folder where input files are located
+path_in="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp"
+
+# Path to the folder where the simulation is ran from and output files saved
+path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir"
+
+
+echo "Nique ta grand mere"
+echo $path_in
+cd "$path_in"
+
+# Let's start with sample preparation:
+
+# We need input parameters for basically all the things that are defined in input files:
+# INPUT FILES NEEDING / NOT NEEDING A CORRESPONDING VARIABLE ENTRY:
+
+
+# THE ORDER IS CRUCIAL !!! LAMMPS READS THE VALUES ONE AFTER THE OTHER
+# The entries of the array must match the order of declaration of the variables
+# in the corresponding LAMMPS input files. Modifications MUST be consistent!
+
+# == Variables for input parameters of `in.DEF_param_sample_preparation_3` == #
+var_param_sample_preparation_3=() 
+# Sample size
+var_param_sample_preparation_3+=(8e3) # Number of particles: `Ntarget`
+var_param_sample_preparation_3+=(1) # Aspect ratio of the sample Lz/Lx or Lz/Ly: `aspectratio`
+var_param_sample_preparation_3+=(1.5) # Additional padding of walls from periodic cell boundary: `wallpad`
+# Random generation
+var_param_sample_preparation_3+=(5019) # Random integer seed for uniform particle diameter: `dseed`
+var_param_sample_preparation_3+=(7864) # Random integer seed for orientation of clumps upon lattice deposition: `orientseed`
+# Mixing
+var_param_sample_preparation_3+=(0.3) # Minimum packing fraction of lattice deposition before mixing: `pfmin`
+var_param_sample_preparation_3+=(5) # Amount of mixing as a ratio of average particle displacement and average diameter: `mixamount`
+var_param_sample_preparation_3+=(1e-5) # Magnitude of the mean mixing velocity as a ratio of average diameter and characteristic time (must be very small): `mixintensity`
+var_param_sample_preparation_3+=(3254) # Random integer seed for velocity of particles mixing: `mixseed`
+var_param_sample_preparation_3+=(0.05) # Magnitude of uniform scaling to separate contacts after mixing: `contact_expansion`
+# Percolation
+var_param_sample_preparation_3+=(0.45) # Target packing fraction to start slow compression from (cannot be too large): `pf0`
+var_param_sample_preparation_3+=(1e-1) # Inertial number for shrinkage from granular gas to target packing fraction: `In0_percolation`
+var_param_sample_preparation_3+=(0.001) # Average normalized overlap to stop relaxation: `relax_overlap`
+# Equilibrium
+var_param_sample_preparation_3+=(1e-2) # Inertial number for compression to reach target isotropic pressure: `In0_pressure`
+var_param_sample_preparation_3+=(1e-3) # Inertial number for final equilibrium (all convergence criteria): `In0_equilibrium`
+
+
+
+#in.DEF_param_sample_3 : YES AND DONE !
+# in.DEF_init_pre_3 : NO - MAYBE IN THE FUTURE IF WE USE ELLIPSOIDS
+# in.DEF_init_particles_3 : YES
+# in.DEF_init_material_3 : YES
+# 
+# in.DEF_param_simulation_3 : YES
+# in.DEF_param_BC_control : YES
+# in.DEF_param_equilibrium_3 : YES
+# in.DEF_init_post_3 : NO
+# 
+# in.SET_structure_3 : NO
+# in.SET_boundary_3 : NO
+# in.SET_macro_properties_3 : NO
+# in.SET_conv_3 : NO
+
+# We also need to define other input parameters that may be used within a file, like different pressure levels, or values of I0 during different runs
+# Locate the atomfiles if necessary
+# name the dumps and the logs
+# actually some parameters are related to the test themselfs and need a DEF_script. We used one for the triax/oedo, we could use one for the preparation / densification
+# material
+# simulation
+#
+# THE PARAMETERS FOR SAMPLE PREPARATION AND SAMPLE DENSIFICATION WOULD NOT BE NEEDED FOR OTHER master scripts. Where should we use them? We should put them here still, have a massive bulk of parameters and pick the ones we need
+
+# Homogenization of the dump, thermo, checks etc output
+# What to do with the log files ?
+
+run_MPI=no # use serial or parallel computation
+# run this -var switch multiple times ?
+
+echo_switch=log # LAMMPS input script commands echoed in: none, screen, log, both
+screen_switch='' # LAMMPS thermo output to screen: '-screen none', '-screen filename' or `` (empty, for regular console output)
+
+#echo "	(1) Deposition start"
+mpiexec -n 8 lmp_mpi -in in.MAIN_sample_preparation_3 -var var_param_sample_preparation_3 ${var_param_sample_preparation_3[*]} $screen_switch
+#wait
+
+echo "what?"
