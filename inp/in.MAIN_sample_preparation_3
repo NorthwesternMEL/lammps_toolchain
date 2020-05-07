@@ -1,6 +1,6 @@
 # LAMMPS INPUT FILE PERFORMING THE GENERATION AND PREPARATION OF THE SAMPLE UNDER ISOTROPIC COMPRESSION OF 3D GRANULAR SYSTEMS
 # file: in.MAIN_sample_preparation_3
-# author: JBC @ NORTHWESTERN UNIVERSITY, 09/12/2019
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS A MAIN SCRIPT. ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
 # THIS SCRIPT MUST ONLY BE CALLED ONE TIME
@@ -20,6 +20,7 @@
 # ---- INITIALIZATION OF LAMMPS REQUIREMENTS, PARTICLE TYPES, MATERIAL ---- #
 #
 include in.DEF_init_pre_3
+include in.DEF_param_IO
 include in.DEF_init_particles_3
 include in.DEF_init_material_3
 
@@ -74,15 +75,15 @@ set type 2 mass $(v_Nparticles^(2/3)*v_msys) # mass of boundary = Approximate ma
 # ---- SETUP OF THE BOUNDARY CONDITIONS, STRUCTURES, RIGID BODIES (if clumps), POLYDISPERSITY AND CONVERGENCE ---- #
 #
 
-variable READWALL equal false # determine wall coordinates from current box dimensions and wall padding: Hardcoded here to avoid wrong values from passed arguments
+variable READWALL equal false # determine wall coordinates from current box dimensions and wall padding: Hardcoded here, walls always created in sample preparation
 include in.SET_structure_3
 include in.SET_boundary_3
 include in.SET_macro_properties_3
 
 if "${SPHERE} && ${UNIFORMPSD}" then "variable drand atom random(${dmin},${dmax},${dseed}) # Random generation of particles diameters, reference case for coding fallback" &
-elif "${SPHERE} && !${UNIFORMPSD}" "variable drand atomfile ${PSD_filename} # Random particles diameters picked from the selected PSD" &
+elif "${SPHERE} && !${UNIFORMPSD}" "variable drand atomfile ${fname_read_PSD} # Random particles diameters picked from the selected PSD" &
 elif "!${SPHERE} && ${UNIFORMPSD}" "variable drand atom random($(v_dmin/v_dmax),1,${dseed}) # Random generation of particles diameters, scaling from dmax, reference case for coding fallback" &
-elif "!${SPHERE} && !${UNIFORMPSD}" "variable drand0 atomfile ${PSD_filename}" "variable drand atom v_drand0/v_dmax # Random particles diameters picked from the selected PSD, scaling from dmax"
+elif "!${SPHERE} && !${UNIFORMPSD}" "variable drand0 atomfile ${fname_read_PSD}" "variable drand atom v_drand0/v_dmax # Random particles diameters picked from the selected PSD, scaling from dmax"
 
 if "${SPHERE}" then &
 "set type 1 diameter v_drand" &
@@ -207,7 +208,7 @@ pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL $
 
 variable In0 equal ${In0_pressure} # Overwrite the inertial number to smaller value for compression
 variable remap_save equal $(v_REMAP) # Save the value of REMAP passed to the script for later use
-variable REMAP equal true # Initial compaction akways using remapping to ensure homogeneous compaction
+variable REMAP equal true # Initial compaction always using remapping to ensure homogeneous compaction
 
 variable SHEARRELAX equal false # No shear/tilt relax - orthogonal box
 include in.PRESET_BC_control_ISO_3 # preset isotropic conditions to target pressure
@@ -247,6 +248,8 @@ velocity floaters set 0.0 0.0 0.0 # Kill completely velocity of floaters
 
 # Walls coordinates
 
+variable fname_write_wall string "${quote}${pathstr}/wall.sample_preparation_3${suffixstr}${quote}" # Name of wall file written with absolute path
+
 if '${BC_XX_WALL} && ${BC_YY_WALL} && ${BC_ZZ_WALL}' then &
 'print """# Position of the walls after initial deposition
 $(v_xlo_BC) # xlo wall
@@ -254,20 +257,24 @@ $(v_xhi_BC) # xhi wall
 $(v_ylo_BC) # ylo wall
 $(v_yhi_BC) # yhi wall
 $(v_zlo_BC) # zlo wall
-$(v_zhi_BC) # zhi wall """ file wpos0.txt'
+$(v_zhi_BC) # zhi wall """ file ${fname_write_wall}'
 
 # Particles coordinates and topology
 
-dump savedmpcoor particles custom 1 dump.co_sample_3.lammpstrj id x y z diameter
+variable fname_write_dump_co string "${quote}${pathstr}/dump.co_sample_preparation_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
+dump savedmpcoor particles custom 1 ${fname_write_dump_co} id x y z diameter
 dump_modify savedmpcoor sort id
 
+variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_sample_preparation_3${suffixstr}.lammpstrj${quote}" # Name of topology dump file written with absolute path
 compute savepair particles property/local patom1 patom2 # pairs of particles within force cutoff
 compute savecontact particles pair/local force p4 p10 p11 p12 # interparticle distance, normal force magnitude, tangent force magnitude, branch vector x, y, z
-dump savedmptopo particles local 1 dump.topo_sample_3.lammpstrj c_savepair[*] c_savecontact[*]
+dump savedmptopo particles local 1 ${fname_write_dump_topo} c_savepair[*] c_savecontact[*]
 
 run 0 # To output final coordinates and neighbor list
 
 # Restart / data file
 
-write_restart restart.sample_3
-write_data data.sample_3
+variable fname_write_restart string "${quote}${pathstr}/restart.sample_preparation_3${suffixstr}${quote}" # Name of restart file written with absolute path
+write_restart ${fname_write_restart}
+variable fname_write_data string "${quote}${pathstr}/data.sample_preparation_3${suffixstr}${quote}" # Name of data file written with absolute path
+write_data ${fname_write_data}

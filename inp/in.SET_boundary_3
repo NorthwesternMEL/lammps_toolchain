@@ -1,6 +1,6 @@
 # LAMMPS INPUT FILE SETTING UP THE BOUNDARY CONDITIONS OF THE SIMULATION FOR 3D GRANULAR SYSTEMS
 # file: in.SET_boundary_3
-# author: JBC @ NORTHWESTERN UNIVERSITY, 08/07/2019
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS A SET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT MUST NOT BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
 # THIS SCRIPT MUST ONLY BE CALLED ONE TIME
@@ -37,7 +37,7 @@ else &
 # ---- DETERMINE IF WALL POSITION SHOULD BE PRESCRIBED OR READ FROM FILE ---- #
 
 if "${READWALL} && ${SET_FLAG_WALL}" then &
-"variable wpos file wpos0.txt # read the position of the wall from cooridnates after deposition" &
+"variable wpos file ${fname_read_wall} # read the position of the wall from cooridnates after deposition" &
 "variable xlo_0_BC equal $(v_wpos)" &
 "next wpos" &
 "variable xhi_0_BC equal $(v_wpos)" &

@@ -1,6 +1,6 @@
 # LAMMPS INPUT FILE PERFORMING THE DENSIFICATION OF THE LOOSE SAMPLE PREVIOUSLY PREPARED UNDER ISOTROPIC COMPRESSION OF 3D GRANULAR SYSTEMS
 # file: in.MAIN_sample_densification_3
-# author: JBC @ NORTHWESTERN UNIVERSITY, 04/14/2020
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS A MAIN SCRIPT. ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
 # THIS SCRIPT MUST ONLY BE CALLED ONE TIME
@@ -11,7 +11,7 @@
 # - Uses method from Salot et al., 2009 with reduced friction. Add a slight vibration to create dense systems of low coordination (Agnolin & Roux 2007)
 #
 # TODO:
-# -
+# - define a short run value Nshort for the vibration
 # -
 
 ####################
@@ -19,14 +19,14 @@
 ####################
 
 # ---- LOAD INITIAL SAMPLE ---- #
-
-read_restart restart.sample_3
+include in.DEF_param_IO
+read_restart ${fname_read_restart} # Will need to select where the restart file is coming from
 
 # ---- DEFINITION OF THE PARAMETERS AND LAMMPS REQUIREMENTS ---- #
 
 include in.DEF_init_particles_3
 include in.DEF_init_material_3
-include in.DEF_param_sample_3
+include in.DEF_param_sample_densification_3
 include in.DEF_param_simulation_3
 include in.DEF_param_BC_control_3
 include in.DEF_param_equilibrium_3
@@ -34,12 +34,7 @@ include in.DEF_init_post_3
 
 # ---- SETUP OF THE BOUNDARY CONDITIONS AND STRUCTURES ---- #
 
-variable BC_XX_WALL equal false # Overwrite default, creates PBC/WALL
-variable BC_YY_WALL equal false # Overwrite default, creates PBC/WALL
-variable BC_ZZ_WALL equal false # Overwrite default, creates PBC/WALL
-
-variable READWALL equal true # determine wall coordinates (if wall) from file. DO NOT CHANGE
-
+variable READWALL equal true # determine wall coordinates (if wall) from file: Hardcoded here, walls must have already been created by sample prepartion
 include in.SET_structure_3
 include in.SET_boundary_3
 include in.SET_macro_properties_3
@@ -53,7 +48,6 @@ include in.SET_conv_3
 
 # ---- MATERIAL AND CONTACT LAW ---- #
 
-variable friction_reduction equal 0.65 # Reduction coefficient between 0 and 1
 pair_style	granular
 pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} $(v_f*v_friction_reduction) # Contact law with reduced friction for densification (Salot et al., 2009)
 
@@ -71,13 +65,13 @@ else "print 'Script Error: flag SPHERE should have value true or false and was g
 
 ## FIRST COMPRESSION WITH REMAPPING TO ENSURE HOMEGENEITY OF STRESS/SAMPLE
 
-variable In0 equal 1e-3 # Overwrite the inertial number to smaller values for compression
-variable REMAP equal true
+variable In0 equal ${In0_pressure} # Overwrite the inertial number to smaller values for compression
+variable remap_save equal $(v_REMAP) # Save the value of REMAP passed to the script for later use
+variable REMAP equal true # Initial compaction always using remapping to ensure homogeneous compaction
 
-variable SHEARRELAX equal false # No shear/tilt relax - orthogonal box
+variable SHEARRELAX equal false # No shear/tilt relax - orthogonal box: Hardcoded because triclinic seem to pose issues
 include in.PRESET_BC_control_ISO_3 # preset isotropic conditions to target pressure
 include in.START_BC_control_3 # Start Boundary controller
-
 include in.PRESET_equilibrium_stress_3 # Sets equilibrium conditions on stress only
 include in.START_equilibrium_3 # Start equilibrium check
 
@@ -90,38 +84,29 @@ include in.STOP_BC_control_3 # Stop Boundary controller
 
 ## EXPANSION TO RELEASE CONTACTS
 
-thermo_style custom step v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz v_pf
-run 0 # To allow change box (verify at the run that all pressure are equal to zero i.e. no contact between particles)
-variable expansion equal 0.001 # We stop when average indentation (Kappa^-1 = h/d) is smaller than 0.001 [Agnolin 2007] uses 0.005 to remap, we do the same but use a smaller criterion for convergence before making a bigger remap using 0.005
-change_box all x scale $(1+v_expansion) y scale $(1+v_expansion) z scale $(1+v_expansion) remap # Expansion to make sure there is no contact left
+if "${BREAKCONTACT}" then &
+"thermo_style custom step v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz v_pf" &
+"run 0 # To allow change box (verify at the run that all pressures are equal to zero i.e. no contact between particles)" &
+"change_box all x scale $(1+v_contact_expansion) y scale $(1+v_contact_expansion) z scale $(1+v_contact_expansion) remap # Expansion to make sure there is no contact left" &
+"## SMALL VIBRATION TO SLIGHTLY SHIFT CONTACTS AND BREAK DENSITY - COORDINATION CORRELATION" &
+"pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} 0.0 # Contact law with no friction for shaking phase (Agnolin & Roux 2007)" &
+"variable mixtemp equal $(v_msys*(v_mixintensity*v_dsys/v_tsyshertz)^2/(3*1.380e-23)) # Equivalent temperature for average mixing velocity based on gas kinetic theory T=mv^2/3kb (Boltzmann constant kb=1.380e-23)" &
+"velocity particles create ${mixtemp} ${mixseed} temp temp_sphere" &
+"run 0" &
+"velocity particles scale ${mixtemp} temp temp_sphere" &
+"thermo_style custom step v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz v_pf" &
+"run 1000 # Shake for a very short period, just to shift contact topology" &
+"velocity particles set 0.0 0.0 0.0" &
+"set group particles omega 0.0 0.0 0.0" &
+"change_box all x scale $(1+v_contact_expansion) y scale $(1+v_contact_expansion) z scale $(1+v_contact_expansion) remap # re-separate contacts before final compression"
 
-## SMALL VIBRATION TO SLIGHTLY SHIFT CONTACTS AND BREAK DENSITY - COORDINATION CORRELATION
-pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} 0.0 # Contact law with no friction for shaking phase (Agnolin & Roux 2007)
-velocity particles create $(1e0*v_msys*((v_dsys/v_K0)/v_tsyshertz)^2/(3*1.380e-23)) ${mixseed} temp temp_sphere # CHANGE THE PREFACTOR TO SHAKE WITH MORE INTENSITY
-run 0
-velocity particles scale $(1e0*v_msys*((v_dsys/1e4)/v_tsyshertz)^2/(3*1.380e-23)) temp temp_sphere
 
-thermo_style custom step v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz v_pf
-run 1000 # Shake for a very short period, just to shift contact topology
-
-velocity particles set 0.0 0.0 0.0
-set group particles omega 0.0 0.0 0.0
-
-# RE SEPARATE BEFORE FINAL COMPACTION
-change_box all x scale $(1+v_expansion) y scale $(1+v_expansion) z scale $(1+v_expansion) remap # Expansion to make sure there is no contact left
-# RE SEPARATE BEFORE FINAL COMPACTION
+## FINAL COMPRESSION
 
 pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} $f # Contact law with true friction for finale assembly at the given porosity (Agnolin & Roux 2007)
 
-## SECOND COMPRESSION WITH/WITHOUT REMAPPING DEPENDING ON WALLS / NO WALLS
-
-if "${BC_XX_WALL} && ${BC_YY_WALL} && ${BC_ZZ_WALL}" then &
-"variable REMAP equal false # Final equilibration without remapping if walls" &
-elif "!${BC_XX_WALL} && !${BC_YY_WALL} && !${BC_ZZ_WALL}" &
-"variable REMAP equal true # Final equilibration with remapping if PBC" &
-else &
-"print 'Script Error: boundaries must either all be periodic or all have walls. Flags BC_AXIS_WALL were given $(v_BC_XX_WALL), $(v_BC_YY_WALL) and $(v_BC_ZZ_WALL)'" &
-"quit"
+variable In0 equal ${In0_equilibrium} # Overwrite the inertial number to small value for equilibration
+variable REMAP equal $(v_remap_save) # Retrieve remapping value passed to script
 
 include in.PRESET_equilibrium_all_3 # Sets equilibrium conditions on all variables
 include in.START_BC_control_3
@@ -147,7 +132,11 @@ velocity floaters set 0.0 0.0 0.0 # Kill completely velocity of floaters
 # ---- OUTPUT / SAVE SYSTEM GEOMETRY ---- #
 ###########################################
 
+variable frictionstr string $(v_friction_reduction:%1.3f) # string of friction reduction factor
+
 # Walls coordinates
+
+variable fname_write_wall string "${quote}${pathstr}/wall.sample_densification_${frictionstr}_3${suffixstr}${quote}" # Name of wall file written with absolute path
 
 if '${BC_XX_WALL} && ${BC_YY_WALL} && ${BC_ZZ_WALL}' then &
 'print """# Position of the walls after initial deposition
@@ -156,20 +145,24 @@ $(v_xhi_BC) # xhi wall
 $(v_ylo_BC) # ylo wall
 $(v_yhi_BC) # yhi wall
 $(v_zlo_BC) # zlo wall
-$(v_zhi_BC) # zhi wall """ file wpos0_dense_Salot2009_$(v_friction_reduction).txt'
+$(v_zhi_BC) # zhi wall """ file ${fname_write_wall}'
 
 # Particles coordinates and topology
 
-dump savedmpcoor particles custom 1 dump.co_sample_densification_$(v_friction_reduction)_3.lammpstrj id x y z diameter
+variable fname_write_dump_co string "${quote}${pathstr}/dump.co_sample_densification_${frictionstr}_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
+dump savedmpcoor particles custom 1 ${fname_write_dump_co} id x y z diameter
 dump_modify savedmpcoor sort id
 
+variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_sample_densification_${frictionstr}_3${suffixstr}.lammpstrj${quote}" # Name of topology dump file written with absolute path
 compute savepair particles property/local patom1 patom2 cutoff radius # pairs of particles within force cutoff
 compute savecontact particles pair/local force p4 p10 p11 p12 cutoff radius # interparticle distance, normal force magnitude, tangent force magnitude, branch vector x, y, z
-dump savedmptopo particles local 1 dump.topo_sample_densification_$(v_friction_reduction)_3.lammpstrj c_savepair[*] c_savecontact[*]
+dump savedmptopo particles local 1 ${fname_write_dump_topo} c_savepair[*] c_savecontact[*]
 
 run 0 # To output final coordinates and neighbor list
 
 # Restart / data file
 
-write_restart restart.sample_densification_$(v_friction_reduction)_3
-write_data data.sample_densification_$(v_friction_reduction)_3
+variable fname_write_restart string "${quote}${pathstr}/restart.sample_densification_${frictionstr}_3${suffixstr}${quote}" # Name of restart file written with absolute path
+write_restart ${fname_write_restart}
+variable fname_write_data string "${quote}${pathstr}/data.sample_densification_${frictionstr}_3${suffixstr}${quote}" # Name of data file written with absolute path
+write_data ${fname_write_data}

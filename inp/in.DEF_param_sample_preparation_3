@@ -1,4 +1,4 @@
-# LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR THE SAMPLE PROPERTIES OF 3D GRANULAR SYSTEMS
+# LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR THE PREPARATION OF 3D GRANULAR SYSTEMS
 # file: in.DEF_param_sample_preparation_3
 # author: JBC @ NORTHWESTERN UNIVERSITY (jibril.coulibaly@gmail.com)
 #
@@ -17,42 +17,42 @@
 # ---- SAMPLE PREPARATION PARAMETERS ---- #
 
 # Sample size
-variable Ntarget equal $(v_var_param_sample_preparation_3) # Target number of particles in the system
+variable Ntarget equal ${var_param_sample_preparation_3} # Target number of particles in the system
 next var_param_sample_preparation_3
-variable aspectratio equal $(v_var_param_sample_preparation_3) # Aspect ratio of the simulation box: aspectratio = Z_dimension/X.Y_dimension
+variable aspectratio equal ${var_param_sample_preparation_3} # Aspect ratio of the simulation box: aspectratio = Z_dimension/X.Y_dimension
 next var_param_sample_preparation_3
-variable wallpad equal $(v_var_param_sample_preparation_3) # Additional padding of walls from periodic cell boundary
+variable wallpad equal ${var_param_sample_preparation_3} # Additional padding of walls from periodic cell boundary
 next var_param_sample_preparation_3
 
 # Random generation
-variable dseed equal $(v_var_param_sample_preparation_3) # Random integer seed for uniform particle diameter
+variable dseed equal ${var_param_sample_preparation_3} # Random integer seed for uniform particle diameter
 next var_param_sample_preparation_3
-variable orientseed equal $(v_var_param_sample_preparation_3) # Random integer seed for orientation of clumps upon lattice deposition
+variable orientseed equal ${var_param_sample_preparation_3} # Random integer seed for orientation of clumps upon lattice deposition
 next var_param_sample_preparation_3
 
 # Mixing
-variable pfmin equal $(v_var_param_sample_preparation_3) # Minimum packing fraction of lattice deposition before mixing: 0.49 in 3D, [Agnolin 2007] uses 0.45 in 3D to make room for mixing
+variable pfmin equal ${var_param_sample_preparation_3} # Minimum packing fraction of lattice deposition before mixing: 0.49 in 3D, [Agnolin 2007] uses 0.45 in 3D to make room for mixing
 next var_param_sample_preparation_3
-variable mixamount equal $(v_var_param_sample_preparation_3) # Mixing stops when average particle displacement is mixamount times the average diameter, depends on PBC or WALL, less movement with walls, sould be lower
+variable mixamount equal ${var_param_sample_preparation_3} # Mixing stops when average particle displacement is mixamount times the average diameter, depends on PBC or WALL, less movement with walls, sould be lower
 next var_param_sample_preparation_3
-variable mixintensity equal $(v_var_param_sample_preparation_3) # Intensity of the mixing,magnitude of the mean velocity given in fraction of diameter dsys traveled over the characteristic time tsys (must be very small)
+variable mixintensity equal ${var_param_sample_preparation_3} # Intensity of the mixing,magnitude of the mean velocity given in fraction of diameter dsys traveled over the characteristic time tsys (must be very small)
 next var_param_sample_preparation_3
-variable mixseed equal $(v_var_param_sample_preparation_3) # Random integer seed for velocity of particles mixing
+variable mixseed equal ${var_param_sample_preparation_3} # Random integer seed for velocity of particles mixing
 next var_param_sample_preparation_3
-variable contact_expansion equal $(v_var_param_sample_preparation_3) # fraction of the scaling to separate contacts after mixing (uniform scaling of magnitude 1+contact_expansion)
+variable contact_expansion equal ${var_param_sample_preparation_3} # fraction of the scaling to separate contacts after mixing (uniform scaling of magnitude 1+contact_expansion)
 next var_param_sample_preparation_3
 
 # Percolation
-variable pf0 equal $(v_var_param_sample_preparation_3) # Target packing fraction for sample generation, cannot be too large
+variable pf0 equal ${var_param_sample_preparation_3} # Target packing fraction for sample generation, cannot be too large
 next var_param_sample_preparation_3
-variable In0_percolation equal $(v_var_param_sample_preparation_3) # Inertial number for first shrinkage from low packing fraction granular gas to target packing fraction granular gas
+variable In0_percolation equal ${var_param_sample_preparation_3} # Inertial number for first shrinkage from low packing fraction granular gas to target packing fraction granular gas
 next var_param_sample_preparation_3
-variable relax_overlap equal $(v_var_param_sample_preparation_3) # Average normalized overlap (Kappa^-1 = h/d) to stop relaxation. We use 5 times this overlap to separate the contacts after relaxation
+variable relax_overlap equal ${var_param_sample_preparation_3} # Average normalized overlap (Kappa^-1 = h/d) to stop relaxation. We use 5 times this overlap to separate the contacts after relaxation
 next var_param_sample_preparation_3
 
 # Equilibrium
-variable In0_pressure equal 1e-2 # Inertial number for second shrinkage to target isotropic pressure
+variable In0_pressure equal ${var_param_sample_preparation_3} # Inertial number for second shrinkage to target isotropic pressure
 next var_param_sample_preparation_3
-variable In0_equilibrium equal 1e-3 # Inertial number for final equilibrium to all convergence criteria at target isotropic pressure
-# NEVER call `next` on the variable at the end of the script.
-# This would exhaust the variable and skip the next `jump` command and cause the scripts to fail !
+variable In0_equilibrium equal ${var_param_sample_preparation_3} # Inertial number for final equilibrium to all convergence criteria at target isotropic pressure
+# NEVER call `next` on the variable at the end of the definitions.
+# This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !

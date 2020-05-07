@@ -1,0 +1,39 @@
+# LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR THE DENSIFICATION OF 3D GRANULAR SYSTEMS
+# file: in.DEF_param_sample_densification_3
+# author: JBC @ NORTHWESTERN UNIVERSITY (jibril.coulibaly@gmail.com)
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+#
+#
+# INFO :
+# - MUST BE DEFINED AFTER DEF_param_material_3 IN MAIN SCRIPT
+# - MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
+# - variable `var_param_sample_densification_3` (index-style) is passed to LAMMPS by command line switch -var var_param_sample_densification_3
+#
+# TODO:
+# - 
+
+# ---- SAMPLE DENSIFICATION PARAMETERS ---- #
+
+# Compression at reduced friction
+variable friction_reduction equal ${var_param_sample_densification_3} # Reduction coefficient between 0 and 1
+next var_param_sample_densification_3
+variable In0_pressure equal ${var_param_sample_densification_3} # Inertial number for compression to target isotropic pressure
+next var_param_sample_densification_3
+
+# Contact separation
+variable BREAKCONTACT equal ${var_param_sample_densification_3} # Flag to determine if contact are separated after compression at reduced friction (False: Salot et al.,2009, True: limit coordination-density correlation)
+next var_param_sample_densification_3
+variable contact_expansion equal ${var_param_sample_densification_3} # fraction of the scaling to separate contacts (uniform scaling of magnitude 1+contact_expansion)
+next var_param_sample_densification_3
+variable mixintensity equal ${var_param_sample_densification_3} # Intensity of the mixing,magnitude of the mean velocity given in fraction of diameter dsys traveled over the characteristic time tsys (must be very small)
+next var_param_sample_densification_3
+variable mixseed equal ${var_param_sample_densification_3} # Random integer seed for velocity of particles mixing
+next var_param_sample_densification_3
+
+# Equilibrium
+variable In0_equilibrium equal ${var_param_sample_densification_3} # Inertial number for final equilibrium to all convergence criteria at target isotropic pressure
+#next var_param_sample_densification_3
+# NEVER call `next` on the variable at the end of the definitions.
+# This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !

@@ -38,19 +38,34 @@
 # can run bash, and on GNU/Linux platform or WSL where bash is default/native
 #
 #
-# =============================================================================
+# =========================================================================== #
 #
 
-
+# == GENERAL PATHS TO DIRECT THE WORKFLOW OF FILES == #
 # Path to 'inp' folder where input files are located
 path_in="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp"
 
-# Path to the folder where the simulation is ran from and output files saved
+# Path to the folder where output files (dump,restart,data,log,wall) are saved
 path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir"
 
+# Suffix appended to output files (dump,restart,data,log,wall): no white space!
+fname_suffix="" # If no suffix, use empty string ""
 
-echo "Nique ta grand mere"
-echo $path_in
+# == SPECIFIC FILES READ AS INPUT FOR SIMULATIONS == #
+
+# Restart file used in the simulation (absolute path)
+file_restart="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\restart.sample_preparation_3"
+
+# Wall coordinates file used in the simulation (absolute path)
+file_wall="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\wall.sample_preparation_3"
+
+# Particle Size Distribution atomfile file used in the simulation (absolute path)
+file_PSD="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\PSDtemplate\PSD_Foundry.atom"
+
+
+
+mkdir "$path_out" # Creates the output directory 
+# make a try/catch command 1 || command 2 if dir exists and rm*? NO ! what if we run from a folder where there are stuff in? Or ask delete or not delete?
 cd "$path_in"
 
 # Let's start with sample preparation:
@@ -75,7 +90,7 @@ var_param_sample_preparation_3+=(7864) # Random integer seed for orientation of 
 # Mixing
 var_param_sample_preparation_3+=(0.3) # Minimum packing fraction of lattice deposition before mixing: `pfmin`
 var_param_sample_preparation_3+=(5) # Amount of mixing as a ratio of average particle displacement and average diameter: `mixamount`
-var_param_sample_preparation_3+=(1e-5) # Magnitude of the mean mixing velocity as a ratio of average diameter and characteristic time (must be very small): `mixintensity`
+var_param_sample_preparation_3+=(3e-3) # Magnitude of the mean mixing velocity as a ratio of average diameter and characteristic time (must be small): `mixintensity`
 var_param_sample_preparation_3+=(3254) # Random integer seed for velocity of particles mixing: `mixseed`
 var_param_sample_preparation_3+=(0.05) # Magnitude of uniform scaling to separate contacts after mixing: `contact_expansion`
 # Percolation
@@ -87,11 +102,24 @@ var_param_sample_preparation_3+=(1e-2) # Inertial number for compression to reac
 var_param_sample_preparation_3+=(1e-3) # Inertial number for final equilibrium (all convergence criteria): `In0_equilibrium`
 
 
+# = Variables for input parameters of `in.DEF_param_sample_densification_3` = #
+var_param_sample_densification_3=() 
+# Compression at reduced friction
+var_param_sample_densification_3+=(0.65) # Reduction of friction (between 0 and 1): `friction_reduction`
+var_param_sample_densification_3+=(1e-3) # Inertial number for compression to reach target isotropic pressure: `In0_pressure`
+# Contact separation
+var_param_sample_densification_3+=(false) # Flag for contact separation after compression at reduced friction: `BREAKCONTACT`
+var_param_sample_densification_3+=(0.001) # Magnitude of uniform scaling to separate contacts: `contact_expansion`
+var_param_sample_densification_3+=(1e-4) # Magnitude of the mean mixing velocity as a ratio of average diameter and characteristic time (must be very small): `mixintensity`
+var_param_sample_densification_3+=(3254) # Random integer seed for velocity of particles mixing: `mixseed`
+# Equilibrium
+var_param_sample_densification_3+=(1e-3) # Inertial number for final equilibrium (all convergence criteria): `In0_equilibrium`
 
-#in.DEF_param_sample_3 : YES AND DONE !
+#in.DEF_param_sample_preparation_3 : YES AND DONE !
+#in.DEF_param_sample_densification_3 : YES AND DONE !
 # in.DEF_init_pre_3 : NO - MAYBE IN THE FUTURE IF WE USE ELLIPSOIDS
 # in.DEF_init_particles_3 : YES
-# in.DEF_init_material_3 : YES
+# in.DEF_init_material_3 : YES - TO DO ASAP
 # 
 # in.DEF_param_simulation_3 : YES
 # in.DEF_param_BC_control : YES
@@ -119,10 +147,31 @@ run_MPI=no # use serial or parallel computation
 # run this -var switch multiple times ?
 
 echo_switch=log # LAMMPS input script commands echoed in: none, screen, log, both
-screen_switch='' # LAMMPS thermo output to screen: '-screen none', '-screen filename' or `` (empty, for regular console output)
+log_switch=log.lammps # LAMMPS log file
+screen_switch='' # LAMMPS thermo output to screen: '-screen none', '-screen <filename>' or '' (empty, for regular console output)
 
 #echo "	(1) Deposition start"
-mpiexec -n 8 lmp_mpi -in in.MAIN_sample_preparation_3 -var var_param_sample_preparation_3 ${var_param_sample_preparation_3[*]} $screen_switch
+mpiexec -n 8 lmp_mpi -in in.MAIN_sample_preparation_3 \
+-var var_param_sample_preparation_3 ${var_param_sample_preparation_3[*]} \
+-var path_out "'$path_out'" \
+-var fname_suffix "'$fname_suffix'" \
+-var file_restart "'$file_restart'" \
+-var file_wall "'$file_wall'" \
+-var file_PSD "'$file_PSD'" \
+-log log.sample_preparation_3.lammps
+$screen_switch
+
+wait
+
+mpiexec -n 8 lmp_mpi -in in.MAIN_sample_densification_3 \
+-var var_param_sample_densification_3 ${var_param_sample_densification_3[*]} \
+-var path_out "'$path_out'" \
+-var fname_suffix "'$fname_suffix'" \
+-var file_restart "'$file_restart'" \
+-var file_wall "'$file_wall'" \
+-var file_PSD "'$file_PSD'" \
+-log log.sample_densification_3.lammps
+$screen_switch
 #wait
 
 echo "what?"
