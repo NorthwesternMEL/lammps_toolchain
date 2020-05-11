@@ -19,14 +19,16 @@
 ####################
 
 # ---- LOAD INITIAL SAMPLE ---- #
-include in.DEF_param_IO
+include in.DEF_init_IO
 read_restart ${fname_read_restart} # Will need to select where the restart file is coming from
 
 # ---- DEFINITION OF THE PARAMETERS AND LAMMPS REQUIREMENTS ---- #
 
+
+include in.DEF_param_sample_densification_3
 include in.DEF_init_particles_3
 include in.DEF_init_material_3
-include in.DEF_param_sample_densification_3
+include in.DEF_init_boundary_3
 include in.DEF_param_simulation_3
 include in.DEF_param_BC_control_3
 include in.DEF_param_equilibrium_3
@@ -34,7 +36,7 @@ include in.DEF_init_post_3
 
 # ---- SETUP OF THE BOUNDARY CONDITIONS AND STRUCTURES ---- #
 
-variable READWALL equal true # determine wall coordinates (if wall) from file: Hardcoded here, walls must have already been created by sample prepartion
+variable READWALL equal true # Read wall coordinates from file. Hardcoded: walls (if any) always read as they existed previously when using a restarted script
 include in.SET_structure_3
 include in.SET_boundary_3
 include in.SET_macro_properties_3

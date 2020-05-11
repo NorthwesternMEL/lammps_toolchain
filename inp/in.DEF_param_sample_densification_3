@@ -7,7 +7,6 @@
 #
 #
 # INFO :
-# - MUST BE DEFINED AFTER DEF_param_material_3 IN MAIN SCRIPT
 # - MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
 # - variable `var_param_sample_densification_3` (index-style) is passed to LAMMPS by command line switch -var var_param_sample_densification_3
 #

@@ -14,8 +14,8 @@
 #
 # TODO:
 # - possibility to have only one wall to move in each direction, vs symmetric motion of both walls?
-# - selec the file from which to read the wall coordinates. Lammps command-line input variable?
 # - figure out mindlin rescale after it is debugged in LAMMPS
+
 
 # ---- DETERMINES IF SIMULATION WITH WALLS OR PBC ---- #
 

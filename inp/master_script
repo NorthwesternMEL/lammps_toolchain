@@ -42,41 +42,66 @@
 #
 
 # == GENERAL PATHS TO DIRECT THE WORKFLOW OF FILES == #
+#
+# Path must be read on their own by LAMMPS command line swtch in order to get the parsing with white space
+#
 # Path to 'inp' folder where input files are located
 path_in="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp"
 
 # Path to the folder where output files (dump,restart,data,log,wall) are saved
-path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir"
+path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir" # `pathstr`
 
 # Suffix appended to output files (dump,restart,data,log,wall): no white space!
 fname_suffix="" # If no suffix, use empty string ""
 
-# == SPECIFIC FILES READ AS INPUT FOR SIMULATIONS == #
-
 # Restart file used in the simulation (absolute path)
-file_restart="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\restart.sample_preparation_3"
-
-# Wall coordinates file used in the simulation (absolute path)
-file_wall="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\wall.sample_preparation_3"
-
-# Particle Size Distribution atomfile file used in the simulation (absolute path)
-file_PSD="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\PSDtemplate\PSD_Foundry.atom"
+file_restart="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\restart.sample_preparation_3" # If no restart file, use empty string "": `restartfile`
 
 
 
 mkdir "$path_out" # Creates the output directory 
-# make a try/catch command 1 || command 2 if dir exists and rm*? NO ! what if we run from a folder where there are stuff in? Or ask delete or not delete?
+# make a try/catch command 1 || command 2 if dir exists and rm*? NO !!! what if we run from a folder where there are stuff in? Or ask delete or not delete?
 cd "$path_in"
 
-# Let's start with sample preparation:
-
-# We need input parameters for basically all the things that are defined in input files:
-# INPUT FILES NEEDING / NOT NEEDING A CORRESPONDING VARIABLE ENTRY:
 
 
 # THE ORDER IS CRUCIAL !!! LAMMPS READS THE VALUES ONE AFTER THE OTHER
 # The entries of the array must match the order of declaration of the variables
 # in the corresponding LAMMPS input files. Modifications MUST be consistent!
+
+
+# == Variables for input parameters of `in.DEF_init_material_3`== #
+var_init_material_3=()
+# Geometric and material properties
+var_init_material_3+=(8.99944e-05) # Diameter of smallest particle [m]: `dmin`
+var_init_material_3+=(0.000399209) # Diameter of largest particle [m]: `dmax`
+var_init_material_3+=(2629.0) # Density of particles [kg / m^3]: `rho`
+var_init_material_3+=(3.5*1e9) # Young's modulus of particles material [Pa]: `E`
+var_init_material_3+=(0.3) # Poisson's ratio of the particles material: `nu`
+var_init_material_3+=(0.5) # Friction coefficient between particles: `f`
+var_init_material_3+=(2.0*1e-5) # Linear Coefficient of Thermal Expansion [m / K]: `lcte`
+var_init_material_3+=(0.0) # Normal contact damping coefficient, DEPRECATED ?: `ncdc`
+var_init_material_3+=(0.0) # Tangent contact damping ratio (tan = ratio * normal), DEPRECATED ?: `tcdr`
+
+
+
+# == Variables for input parameters of `in.DEF_init_boundary_3`== #
+var_init_boundary_3=()
+var_init_boundary_3+=(false) # Flag for wall in XX direction: `BC_XX_WALL`
+var_init_boundary_3+=(false) # Flag for wall in XX direction: `BC_YY_WALL`
+var_init_boundary_3+=(false) # Flag for wall in XX direction: `BC_ZZ_WALL`
+var_init_boundary_3+=(0.0) # Friction coefficient between walls and particles: `fwall`
+# Wall coordinates file used in the simulation (absolute path)
+file_wall="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\wall.sample_preparation_3"
+
+
+
+# == Variables for input parameters of `in.DEF_param_simulation_3`== #
+var_param_simulation_3=()
+
+
+
+
 
 # == Variables for input parameters of `in.DEF_param_sample_preparation_3` == #
 var_param_sample_preparation_3=() 
@@ -85,6 +110,7 @@ var_param_sample_preparation_3+=(8e3) # Number of particles: `Ntarget`
 var_param_sample_preparation_3+=(1) # Aspect ratio of the sample Lz/Lx or Lz/Ly: `aspectratio`
 var_param_sample_preparation_3+=(1.5) # Additional padding of walls from periodic cell boundary: `wallpad`
 # Random generation
+var_param_sample_preparation_3+=(true) # Flag for PSD read from file: `READPSD`
 var_param_sample_preparation_3+=(5019) # Random integer seed for uniform particle diameter: `dseed`
 var_param_sample_preparation_3+=(7864) # Random integer seed for orientation of clumps upon lattice deposition: `orientseed`
 # Mixing
@@ -100,6 +126,9 @@ var_param_sample_preparation_3+=(0.001) # Average normalized overlap to stop rel
 # Equilibrium
 var_param_sample_preparation_3+=(1e-2) # Inertial number for compression to reach target isotropic pressure: `In0_pressure`
 var_param_sample_preparation_3+=(1e-3) # Inertial number for final equilibrium (all convergence criteria): `In0_equilibrium`
+# Particle Size Distribution atomfile file used in the simulation (absolute path)
+file_PSD="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\PSDtemplate\PSD_Foundry.atom" # If no PSD file, use empty string ""
+
 
 
 # = Variables for input parameters of `in.DEF_param_sample_densification_3` = #
@@ -115,13 +144,22 @@ var_param_sample_densification_3+=(3254) # Random integer seed for velocity of p
 # Equilibrium
 var_param_sample_densification_3+=(1e-3) # Inertial number for final equilibrium (all convergence criteria): `In0_equilibrium`
 
+
+
+# We need input parameters for basically all the things that are defined in input files:
+# INPUT FILES NEEDING / NOT NEEDING A CORRESPONDING VARIABLE ENTRY:
 #in.DEF_param_sample_preparation_3 : YES AND DONE !
 #in.DEF_param_sample_densification_3 : YES AND DONE !
+# in.DEF_init_material_3 : YES AND DONE !
+# in.DEF_init_boundary_3: YES AND DONE
+
+
 # in.DEF_init_pre_3 : NO - MAYBE IN THE FUTURE IF WE USE ELLIPSOIDS
-# in.DEF_init_particles_3 : YES
-# in.DEF_init_material_3 : YES - TO DO ASAP
+# in.DEF_init_particles_3 : YES - BUT WHEN WE WANT TO DEAL WITH NON-SPHERICAL PARTICLES IN THE FUTURE. KEEP FOR LEGACY AT THE MOMENT
+
 # 
-# in.DEF_param_simulation_3 : YES
+
+# in.DEF_param_simulation_3 : YES -- UP NEXT !
 # in.DEF_param_BC_control : YES
 # in.DEF_param_equilibrium_3 : YES
 # in.DEF_init_post_3 : NO
@@ -152,25 +190,25 @@ screen_switch='' # LAMMPS thermo output to screen: '-screen none', '-screen <fil
 
 #echo "	(1) Deposition start"
 mpiexec -n 8 lmp_mpi -in in.MAIN_sample_preparation_3 \
--var var_param_sample_preparation_3 ${var_param_sample_preparation_3[*]} \
 -var path_out "'$path_out'" \
 -var fname_suffix "'$fname_suffix'" \
 -var file_restart "'$file_restart'" \
--var file_wall "'$file_wall'" \
--var file_PSD "'$file_PSD'" \
--log log.sample_preparation_3.lammps
+-var var_param_sample_preparation_3 ${var_param_sample_preparation_3[*]} -var file_PSD "'$file_PSD'" \
+-var var_init_material_3 ${var_init_material_3[*]} \
+-var var_init_boundary_3 ${var_init_boundary_3[*]} -var file_wall "'$file_wall'" \
+-log log.sample_preparation_3.lammps \
 $screen_switch
 
 wait
 
 mpiexec -n 8 lmp_mpi -in in.MAIN_sample_densification_3 \
--var var_param_sample_densification_3 ${var_param_sample_densification_3[*]} \
 -var path_out "'$path_out'" \
 -var fname_suffix "'$fname_suffix'" \
 -var file_restart "'$file_restart'" \
--var file_wall "'$file_wall'" \
--var file_PSD "'$file_PSD'" \
--log log.sample_densification_3.lammps
+-var var_param_sample_densification_3 ${var_param_sample_densification_3[*]} \
+-var var_init_material_3 ${var_init_material_3[*]} \
+-var var_init_boundary_3 ${var_init_boundary_3[*]} -var file_wall "'$file_wall'" \
+-log log.sample_densification_3.lammps \
 $screen_switch
 #wait
 

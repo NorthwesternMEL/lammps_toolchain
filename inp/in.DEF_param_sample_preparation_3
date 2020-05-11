@@ -10,6 +10,7 @@
 # - MUST BE DEFINED AFTER DEF_param_material_3 IN MAIN SCRIPT
 # - MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
 # - variable `var_param_sample_preparation_3` (index-style) is passed to LAMMPS by command line switch -var var_param_sample_preparation_3
+# - variable `file_PSD` (index-style) is passed to LAMMPS by command line switch -var file_PSD
 #
 # TODO:
 # - 
@@ -25,6 +26,8 @@ variable wallpad equal ${var_param_sample_preparation_3} # Additional padding of
 next var_param_sample_preparation_3
 
 # Random generation
+variable READPSD equal ${var_param_sample_preparation_3} # Defines is PSD read from file (true) or created uniformly by LAMMPS (false)
+next var_param_sample_preparation_3
 variable dseed equal ${var_param_sample_preparation_3} # Random integer seed for uniform particle diameter
 next var_param_sample_preparation_3
 variable orientseed equal ${var_param_sample_preparation_3} # Random integer seed for orientation of clumps upon lattice deposition
@@ -54,5 +57,9 @@ next var_param_sample_preparation_3
 variable In0_pressure equal ${var_param_sample_preparation_3} # Inertial number for second shrinkage to target isotropic pressure
 next var_param_sample_preparation_3
 variable In0_equilibrium equal ${var_param_sample_preparation_3} # Inertial number for final equilibrium to all convergence criteria at target isotropic pressure
+
+# File to get PSD from. Read separately by LAMMPS command line switch for parsing purposes
+variable PSDfile string ${file_PSD} # Particle Size distribution file read for the simulation, put this here and not in `in.DEF_init_material` because it is only needed for sample preparation
+variable fname_read_PSD string "${quote}${PSDfile}${quote}" # Once sample is created, restart files contain the diameter info and a PSD file is not need
 # NEVER call `next` on the variable at the end of the definitions.
 # This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !

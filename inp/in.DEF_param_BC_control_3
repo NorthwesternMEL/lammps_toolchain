@@ -1,17 +1,17 @@
 # LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR BOUNDARY CONDITIONS CONTROL FOR 3D GRANULAR SYSTEMS
 # file: in.DEF_param_BC_control
-# author: JBC @ NORTHWESTERN UNIVERSITY, 07/30/2019
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
 # THIS SCRIPT MUST ONLY BE CALLED ONE TIME
 #
 #
 # INFO :
-# - MUST BE CALLED BEFORE SET_boundary_3 SCRIPT IN THE MAIN SCRIPT
+# - 
 #
 # TODO:
 # - WE MUST MAKE SURE THE SELECTION BETWEEN WALLS AND PBC IS SAFE, RIGHT NOW A SIMULATION RPEPARED WITH WALLS CAN RUN WITH PBC AND THE OPPOSITE AS WELL (CREATING A BIGGER MESS THIS LATTER WAY)
-# - 
+# - CREATE DEFAULT VALUES OF THE VARIABLES THAT ARE CHANGED BY THE PRESET FiLES
 
 # ---- FLAGS ---- #
 
@@ -22,17 +22,9 @@ variable BC_XY_STRESS_CONTROLLED equal false # BC in XY axis is: true=stress-con
 variable BC_XZ_STRESS_CONTROLLED equal false # BC in XZ axis is: true=stress-controlled, false=strain-controlled. This flag must be false (strain-controlled) when using walls and the associated value must be zero because tilt is not allowed when using frictionless walls
 variable BC_YZ_STRESS_CONTROLLED equal false # BC in YZ axis is: true=stress-controlled, false=strain-controlled. This flag must be false (strain-controlled) when using walls and the associated value must be zero because tilt is not allowed when using frictionless walls
 
-variable BC_XX_WALL equal false # BC in XX axis is: true=a moving wall to control, false=a periodic cell to control, not sure it serves any purpose... YES IT DOES ! IT INFORMS THE SETUP FILE THAT IT MUST CREATE A WALL IN THAT DIRECTION
-variable BC_YY_WALL equal false # BC in YY axis is: true=a moving wall to control, false=a periodic cell to control, not sure it serves any purpose...
-variable BC_ZZ_WALL equal false # BC in ZZ axis is: true=a moving wall to control, false=a periodic cell to control, not sure it serves any purpose...
-# There cannot be a wall in tilt directions so the flags BC_XY_WALL, BC_XZ_WALL, BC_YZ_WALL are not defined
-
 variable REMAP equal true # Remapping of coordinates during boundary control false=no remapping (for walls) ; true=remapping (for PBC and for initial uniform isotropic compression)
 variable SHEARRELAX equal false # Shear/tilt coordinates of the box are relaxed when PBC are used. true=shear relaxed ; false=no tilt, shear stress present. MUST BE DEFINED BEFORE CALLING THE PRESETS
-variable READWALL equal true # flag that must be overwritten when necessary in the script and tell the wall definition to read the coordinates from files or from script. true=initial position of the wall read from file, after deposition, read file wpos0.txt ; false=initial position of the wall determined in the script from box dimensions
 variable BC_CONTROL equal false # If BC CONTROL IS CURRENTLY ACTIVE. false=not active, true=active
-
-variable fwall equal 0.0 # Friction coefficient between walls and particles
 
 # ---- PARAMETERS ---- #
 

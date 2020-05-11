@@ -8,113 +8,66 @@
 #
 # INFO :
 # - MUST BE CALLED AFTER DEF_param_IO SCRIPT IN MAIN SCRIPT
-# - WE DEFINE THE FOLLOWING PARTICLE SIZE DISTRIBUTIONS:
-# -- uniform = uniform;
-# -- foundry = Fonderie sand from EPFL, Switzerland;
-# -- toyoura = Toyoura sand from Japan. The experimental PSD used is that reported by []
-# -- Fujian = Fujian sand from China. The experimental PSD used is that reported by [Liu et al. 2018]
-# -- to be completed with the definition of new particles in the moltemplate bank
-#
+# - - variable `var_init_material_3` (index-style) is passed to LAMMPS by command line switch -var var_init_material_3
 #
 # TODO:
-# - IS THERE A WAY TO CREATE PSD FILES FROM LAMMPS, OTHERWISE THE NUMBER OF PARTICLES MUST BE HARDCODED IN ADVANCE SINCE ID VALUES CANNOT EXCEED THE NUMBER OF PARTICLES ?
-# - WE CAN GIVE A VERY LARGE NUMBER BUT THE NUMBER OF LINES ANNOUNCED IN THE HEADER MUST BE THE CORRECT ONE, FIND A WAY TO JUST CHANGE THE HEADER AT RUNTIME. MAYBE THROUGH CONSOLE
-# - Read PSD type from external console
+# - 
 
-# ---- PARAMETERS ---- #
+# ---- GEOMETRIC AND MATERIAL PROPERTIES ---- #
 #
-variable PSD_type string foundry # PSD types available: uniform, foundry. TO BE READ FROM EXTERNAL OR CONSOLE
-variable UNIFORMPSD equal true # Flag for PSD type: true=uniform PSD, false=non-uniform PSD, read from file
 
-
-# ---- PARTICLE TYPE SELECTION ---- #
-#
-if "${PSD_type}==uniform" then "jump SELF lbl_uniform_PSD" &
-elif "${PSD_type}==foundry" "jump SELF lbl_foundry_PSD" 
-# -- to be completed with the definition of new PSD in the PSDtemplate bank
-
-
-
-#########################
-# ---- UNIFORM PSD ---- #
-#########################
-
-label lbl_uniform_PSD
-
-variable UNIFORMPSD equal true # Default value
-variable dmin equal 0.12*1e-3 # Diameter of the smallest particle [m]
-variable dmax equal 0.48*1e-3 # Diameter of the largest particle [m]
-variable rho equal 2500.0 # Density of particles [kg / m^3]
-variable E equal 50*1e9 # Young's modulus of the particles material [Pa]
-variable nu equal 0.25 # Poisson's ratio of the particles material
-#variable G equal "v_E/(2*(1+v_nu))" # Shear modulus of the particles material [Pa]
-variable f equal 0.25 # Friction coefficient between particles
-variable lcte equal 1.0*1e-5 # Linear Coefficient of Thermal Expansion [m / K]
-variable ncdc equal 0.0 # Normal contact damping coefficient, DEPRECATED ?
-variable tcdr equal 0.0 # Tangent contact damping ratio (tan = ratio * normal), DEPRECATED ?
-
-jump SELF lbl_end_PSD
+variable dmin equal ${var_init_material_3} # Diameter of the smallest particle [m]
+next var_init_material_3
+variable dmax equal ${var_init_material_3} # Diameter of the largest particle [m]
+next var_init_material_3
+variable rho equal ${var_init_material_3} # Density of particles [kg / m^3]
+next var_init_material_3
+variable E equal ${var_init_material_3} # Young's modulus of the particles material [Pa]
+next var_init_material_3
+variable nu equal ${var_init_material_3} # Poisson's ratio of the particles material
+next var_init_material_3
+variable f equal ${var_init_material_3} # Friction coefficient between particles
+next var_init_material_3
+variable lcte equal ${var_init_material_3} # Linear Coefficient of Thermal Expansion [m / K]
+next var_init_material_3
+variable ncdc equal ${var_init_material_3} # Normal contact damping coefficient, DEPRECATED ?
+next var_init_material_3
+variable tcdr equal ${var_init_material_3} # Tangent contact damping ratio (tan = ratio * normal), DEPRECATED ?
+# NEVER call `next` on the variable at the end of the definitions.
+# This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !
 
 
 
 
 
 
+#############################################
+# ---- OLD HARDCODED DATA JUST IN CASE ---- #
+#############################################
+
+# === Ex Uniform 1:4 cycles === #
+#variable dmin equal 0.12*1e-3 # Diameter of the smallest particle [m]
+#variable dmax equal 0.48*1e-3 # Diameter of the largest particle [m]
+#variable rho equal 2500.0 # Density of particles [kg / m^3]
+#variable E equal 50*1e9 # Young's modulus of the particles material [Pa]
+#variable nu equal 0.25 # Poisson's ratio of the particles material
+##variable G equal "v_E/(2*(1+v_nu))" # Shear modulus of the particles material [Pa]
+#variable f equal 0.25 # Friction coefficient between particles
+#variable lcte equal 1.0*1e-5 # Linear Coefficient of Thermal Expansion [m / K]
+#variable ncdc equal 0.0 # Normal contact damping coefficient, DEPRECATED ?
+#variable tcdr equal 0.0 # Tangent contact damping ratio (tan = ratio * normal), DEPRECATED ?
 
 
 
+# === Ex Foundry sand === #
+#variable dmin equal 8.99944e-05 # Diameter of the smallest particle [m]
+#variable dmax equal 0.000399209 # Diameter of the largest particle [m]
+#variable rho equal 2629.0 # Density of particles [kg / m^3]
+#variable E equal 3.5*1e9 # Young's modulus of the particles material [Pa]
+#variable nu equal 0.3 # Poisson's ratio of the particles material
+##variable G equal "v_E/(2*(1+v_nu))" # Shear modulus of the particles material [Pa]
+#variable f equal 0.5 # Friction coefficient between particles
+#variable lcte equal 2.0*1e-5 # Linear Coefficient of Thermal Expansion [m / K]
+#variable ncdc equal 0.0 # Normal contact damping coefficient, DEPRECATED ?
+#variable tcdr equal 0.0 # Tangent contact damping ratio (tan = ratio * normal), DEPRECATED ?
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-############################################
-# ---- REAL SOILS PSD FROM SIEVE DATA ---- #
-############################################
-
-# ---- Foundry sand ---- # TO BE CALIBRATED BASED ON EXPERIMENTAL TESTS
-
-label lbl_foundry_PSD
-
-variable UNIFORMPSD equal false
-variable PSD_filename string PSDtemplate/PSD_Foundry.atom # Path and name of the corresponding atomfile for the Foundry PSD
-variable dmin equal 8.99944e-05 # Diameter of the smallest particle [m]
-variable dmax equal 0.000399209 # Diameter of the largest particle [m]
-variable rho equal 2629.0 # Density of particles [kg / m^3]
-variable E equal 3.5*1e9 # Young's modulus of the particles material [Pa]
-variable nu equal 0.3 # Poisson's ratio of the particles material
-#variable G equal "v_E/(2*(1+v_nu))" # Shear modulus of the particles material [Pa]
-variable f equal 0.5 # Friction coefficient between particles
-variable lcte equal 2.0*1e-5 # Linear Coefficient of Thermal Expansion [m / K]
-variable ncdc equal 0.0 # Normal contact damping coefficient, DEPRECATED ?
-variable tcdr equal 0.0 # Tangent contact damping ratio (tan = ratio * normal), DEPRECATED ?
-
-jump SELF lbl_end_PSD
-
-
-
-
-
-
-# EOF - jump here after the particle has been defined
-
-label lbl_end_PSD

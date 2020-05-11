@@ -20,9 +20,10 @@
 # ---- INITIALIZATION OF LAMMPS REQUIREMENTS, PARTICLE TYPES, MATERIAL ---- #
 #
 include in.DEF_init_pre_3
-include in.DEF_param_IO
+include in.DEF_init_IO
 include in.DEF_init_particles_3
 include in.DEF_init_material_3
+include in.DEF_init_boundary_3
 
 # ---- DEFINITION OF THE PARAMETERS ---- #
 #
@@ -75,15 +76,15 @@ set type 2 mass $(v_Nparticles^(2/3)*v_msys) # mass of boundary = Approximate ma
 # ---- SETUP OF THE BOUNDARY CONDITIONS, STRUCTURES, RIGID BODIES (if clumps), POLYDISPERSITY AND CONVERGENCE ---- #
 #
 
-variable READWALL equal false # determine wall coordinates from current box dimensions and wall padding: Hardcoded here, walls always created in sample preparation
+variable READWALL equal false # Determine wall coordinates from current box dimensions and wall padding. Hardcoded: walls (if any) always created during sample preparation
 include in.SET_structure_3
 include in.SET_boundary_3
 include in.SET_macro_properties_3
 
-if "${SPHERE} && ${UNIFORMPSD}" then "variable drand atom random(${dmin},${dmax},${dseed}) # Random generation of particles diameters, reference case for coding fallback" &
-elif "${SPHERE} && !${UNIFORMPSD}" "variable drand atomfile ${fname_read_PSD} # Random particles diameters picked from the selected PSD" &
-elif "!${SPHERE} && ${UNIFORMPSD}" "variable drand atom random($(v_dmin/v_dmax),1,${dseed}) # Random generation of particles diameters, scaling from dmax, reference case for coding fallback" &
-elif "!${SPHERE} && !${UNIFORMPSD}" "variable drand0 atomfile ${fname_read_PSD}" "variable drand atom v_drand0/v_dmax # Random particles diameters picked from the selected PSD, scaling from dmax"
+if "${SPHERE} && !${READPSD}" then "variable drand atom random(${dmin},${dmax},${dseed}) # Random generation of particles diameters, reference case for coding fallback" &
+elif "${SPHERE} && ${READPSD}" "variable drand atomfile ${fname_read_PSD} # Random particles diameters picked from the selected PSD" &
+elif "!${SPHERE} && !${READPSD}" "variable drand atom random($(v_dmin/v_dmax),1,${dseed}) # Random generation of particles diameters, scaling from dmax, reference case for coding fallback" &
+elif "!${SPHERE} && ${READPSD}" "variable drand0 atomfile ${fname_read_PSD}" "variable drand atom v_drand0/v_dmax # Random particles diameters picked from the selected PSD, scaling from dmax"
 
 if "${SPHERE}" then &
 "set type 1 diameter v_drand" &

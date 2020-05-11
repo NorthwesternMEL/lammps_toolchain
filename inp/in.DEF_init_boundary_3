@@ -1,0 +1,35 @@
+# LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR BOUNDARY CONDITIONS OF THE SIMULATION FOR 3D GRANULAR SYSTEMS
+# file: in.DEF_init_boundary_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+# THIS SCRIPT SHOULD NOT BE MODIFIED
+#
+#
+# INFO :
+# - variable `var_init_boundary_3` (index-style) is passed to LAMMPS by command line switch -var var_init_boundary_3
+# - variable `file_wall` (index-style) is passed to LAMMPS by command line switch -var file_wall
+
+# - MUST BE CALLED BEFORE SET_boundary_3 SCRIPT IN THE MAIN SCRIPT
+#
+# TODO:
+# - possibility to have only one wall to move in each direction, vs symmetric motion of both walls?
+# - figure out mindlin rescale after it is debugged in LAMMPS
+
+
+# ---- PARAMETERS ---- #
+
+variable BC_XX_WALL equal ${var_init_boundary_3} # Wall in XX axis: true for moving wall, false for periodic
+next var_init_boundary_3
+variable BC_YY_WALL equal ${var_init_boundary_3} # Wall in YY axis: true for moving wall, false for periodic
+next var_init_boundary_3
+variable BC_ZZ_WALL equal ${var_init_boundary_3} # Wall in ZZ axis: true for moving wall, false for periodic
+next var_init_boundary_3
+variable fwall equal ${var_init_boundary_3} # Friction coefficient between walls and particles
+
+# File to get wall coordinates from. Read separately by LAMMPS command line switch for parsing purposes
+variable wallfile string ${file_wall} # Wall file read for the simulation
+variable fname_read_wall string "${quote}${wallfile}${quote}"
+# NEVER call `next` on the variable at the end of the definitions.
+# This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !
