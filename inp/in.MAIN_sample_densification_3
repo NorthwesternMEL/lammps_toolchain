@@ -60,13 +60,14 @@ pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL $
 
 
 if "${SPHERE}" then &
-"fix damp_particles_Yade particles cundamp ${damp0particles} ${damp0particles} # Yade Translational and Rotational damping of particles" &
+"fix damp_particles_Yade particles cundamp ${cundamp0} ${cundamp0} # Yade Translational and Rotational damping of particles" &
 elif "!${SPHERE}" &
-"fix damp_particles_Yade particles cundamp/rigid time_integration_clumps ${damp0particles} ${damp0particles} # Yade Translational and Rotational damping of particles" &
+"fix damp_particles_Yade particles cundamp/rigid time_integration_clumps ${cundamp0} ${cundamp0} # Yade Translational and Rotational damping of particles" &
 else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
 
 ## FIRST COMPRESSION WITH REMAPPING TO ENSURE HOMEGENEITY OF STRESS/SAMPLE
 
+variable P0 equal ${Pdensification} # Overwrite reference pressure to pressure level chosen for preparation
 variable In0 equal ${In0_pressure} # Overwrite the inertial number to smaller values for compression
 variable remap_save equal $(v_REMAP) # Save the value of REMAP passed to the script for later use
 variable REMAP equal true # Initial compaction always using remapping to ensure homogeneous compaction
@@ -92,7 +93,7 @@ if "${BREAKCONTACT}" then &
 "change_box all x scale $(1+v_contact_expansion) y scale $(1+v_contact_expansion) z scale $(1+v_contact_expansion) remap # Expansion to make sure there is no contact left" &
 "## SMALL VIBRATION TO SLIGHTLY SHIFT CONTACTS AND BREAK DENSITY - COORDINATION CORRELATION" &
 "pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} 0.0 # Contact law with no friction for shaking phase (Agnolin & Roux 2007)" &
-"variable mixtemp equal $(v_msys*(v_mixintensity*v_dsys/v_tsyshertz)^2/(3*1.380e-23)) # Equivalent temperature for average mixing velocity based on gas kinetic theory T=mv^2/3kb (Boltzmann constant kb=1.380e-23)" &
+"variable mixtemp equal $(v_msys*(v_mixintensity*v_dsys/v_tsyshertz_kn)^2/(3*1.380e-23)) # Equivalent temperature for average mixing velocity based on gas kinetic theory T=mv^2/3kb (Boltzmann constant kb=1.380e-23)" &
 "velocity particles create ${mixtemp} ${mixseed} temp temp_sphere" &
 "run 0" &
 "velocity particles scale ${mixtemp} temp temp_sphere" &
@@ -114,10 +115,10 @@ include in.PRESET_equilibrium_all_3 # Sets equilibrium conditions on all variabl
 include in.START_BC_control_3
 
 if "${SPHERE}" then &
-"fix damp_particles_visct floaters viscous $(v_visc0particles*2*sqrt(v_msys*v_hertzstiff)) # Translational Global damping of particles" &
-"fix damp_particles_viscr floaters viscous/sphere $(v_visc0particles*0.5*v_dsys^2*sqrt(2*v_msys*v_hertzstiff_rot/5)) # Rotational Global damping of particles" &
+"fix damp_particles_visct floaters viscous ${viscdamp_lin} # Translational Global damping of particles" &
+"fix damp_particles_viscr floaters viscous/sphere ${viscdamp_rot} # Rotational Global damping of particles" &
 elif "!${SPHERE}" &
-"fix damp_particles_visct floaters viscous/rigid time_integration_clumps $(v_visc0particles*2*sqrt(v_msys*v_hertzstiff)) $(v_visc0particles*0.5*v_dsys^2*sqrt(2*v_msys*v_hertzstiff_rot/5)) # Global damping of rigid particles" &
+"fix damp_particles_visct floaters viscous/rigid time_integration_clumps ${viscdamp_lin} ${viscdamp_rot} # Global damping of rigid particles" &
 else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
 
 thermo_style custom step v_convke v_convufr v_convfres v_convtqres v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz v_pf v_zmean

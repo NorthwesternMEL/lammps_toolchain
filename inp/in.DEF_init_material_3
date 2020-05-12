@@ -8,7 +8,7 @@
 #
 # INFO :
 # - MUST BE CALLED AFTER DEF_param_IO SCRIPT IN MAIN SCRIPT
-# - - variable `var_init_material_3` (index-style) is passed to LAMMPS by command line switch -var var_init_material_3
+# - variable `var_init_material_3` (index-style) is passed to LAMMPS by command line switch -var var_init_material_3
 #
 # TODO:
 # - 

@@ -1,13 +1,13 @@
 # LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR EQUILIBRIUM OF 3D GRANULAR SYSTEMS
 # file: in.DEF_param_equilibrium_3
-# author: JBC @ NORTHWESTERN UNIVERSITY, 07/30/2019
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
 # THIS SCRIPT MUST ONLY BE CALLED ONE TIME
 #
 #
 # INFO :
-# - 
+# - variable `var_param_equilibrium_3` (index-style) is passed to LAMMPS by command line switch -var var_param_equilibrium_3
 #
 # TODO:
 # - 
@@ -15,14 +15,19 @@
 
 # ---- PARAMETERS ---- #
 
-variable tolke0 equal 1e-8 # Relative tolerance on the average kinetic energy [Radaji Dubois 2011]
-variable tolfres0 equal 1e-4 # Relative tolerance on the force residual [Radaji Dubois 2011] recommended 1e-4 by Agnolin but too strong in polydisperse
-variable toltqres0 equal 1e-4 # Relative tolerance on the torque residual
-variable tolufr0 equal 1e-5 # Tolerance on the unbalanced force ratio [Wautier,Zhao2016] use 1e-5
-variable tolp0 	equal 1e-4 # Relative tolerance on the pressure [Suiker 2004]
-
-variable tolke equal ${tolke0}
-variable tolfres equal ${tolfres0}
-variable toltqres equal ${toltqres0}
-variable tolufr equal ${tolufr0}
-variable tolp 	equal ${tolp0}
+variable tolke0 equal ${var_param_equilibrium_3} # Relative tolerance on the average kinetic energy [Radaji Dubois 2011]
+variable tolke equal ${tolke0} # Default value
+next var_param_equilibrium_3
+variable tolfres0 equal ${var_param_equilibrium_3} # Relative tolerance on the force residual [Radaji Dubois 2011] recommended 1e-4 by Agnolin but too strong in polydisperse
+variable tolfres equal ${tolfres0} # Default value
+next var_param_equilibrium_3
+variable toltqres0 equal ${var_param_equilibrium_3} # Relative tolerance on the torque residual
+variable toltqres equal ${toltqres0} # Default value
+next var_param_equilibrium_3
+variable tolufr0 equal ${var_param_equilibrium_3} # Tolerance on the unbalanced force ratio [Wautier,Zhao2016] use 1e-5
+variable tolufr equal ${tolufr0} # Default value
+next var_param_equilibrium_3
+variable tolp0 	equal ${var_param_equilibrium_3} # Relative tolerance on the pressure [Suiker 2004]
+variable tolp 	equal ${tolp0} # Default value
+# NEVER call `next` on the variable at the end of the definitions.
+# This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !

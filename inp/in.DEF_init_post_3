@@ -25,7 +25,7 @@ elif "!${SPHERE}" &
 else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
 newton off
 neighbor $(v_dmax*0.1) bin
-timestep $(v_dt0r*v_tsyshertz_rot)
+timestep $(v_tstep_fraction*v_tsyshertz_kt)
 
 
 

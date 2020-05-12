@@ -98,9 +98,46 @@ file_wall="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\wa
 
 # == Variables for input parameters of `in.DEF_param_simulation_3`== #
 var_param_simulation_3=()
+# Timestep
+var_param_simulation_3+=(1e-3) # Maximum overlap of Hertz stiffness (relative to diameter) considered for critical timestep: `overlap_tstep`
+var_param_simulation_3+=(0.2) # Fraction of critical timestep sqrt(M/K) used for simulation timestep: `tstep_fraction`
+# Damping
+var_param_simulation_3+=(0.2) # Non-viscous damping factor of Cundall/Yade-DEM damping: `cundamp0`
+var_param_simulation_3+=(0.01) # Viscous damping factor for viscous damping of floaters: `viscdamp0`
+# Run
+var_param_simulation_3+=(100000) # Number of timestep of classic finite run: `Nrun`
+var_param_simulation_3+=(10000000) # Maximum number of timestep of a converging run: `Nmax`
+var_param_simulation_3+=(10000) # Frequency (in number of timesteps) of checks (e.g., equilibrium checks): `Ncheck`
+var_param_simulation_3+=(50000) # Frequency (in number of timesteps) of thermo output: `Nthermo`
+var_param_simulation_3+=(10000) # Frequency (in number of timesteps) of dump output: `Ndump`
 
 
 
+# == Variables for input parameters of `in.DEF_param_BC_control_3`== #
+var_param_BC_control_3=()
+# Kinematics of deformation
+var_param_BC_control_3+=(true) # Remapping of coordinates during deformation: `REMAP`
+var_param_BC_control_3+=(false) # Relaxing of shear stress during deformation with PBC: `SHEARRELAX`
+# Boundary servo-control
+var_param_BC_control_3+=(0.8) # Strain decay factor for stress-controlled boundary ([0;1] , 0=no inertia, 1=no decay): `BC_vprev_factor`
+var_param_BC_control_3+=(1e-2) # Gain for servo control of strain rate - stress difference relationship: `BC_gain`
+var_param_BC_control_3+=(0.25) # Damping of the servo control: `BC_damping`
+
+
+
+# == Variables for input parameters of `in.DEF_param_equilibrium_3`== #
+var_param_equilibrium_3=()
+var_param_equilibrium_3+=(1e-8) # Tolerance on kinetic energy: `tolke0`
+var_param_equilibrium_3+=(1e-4) # Tolerance on residual force: `tolfres0`
+var_param_equilibrium_3+=(1e-4) # Tolerance on residual torque: `toltqres0`
+var_param_equilibrium_3+=(1e-5) # Tolerance on Unbalanced Force Ratio (UFR): `tolufr0`
+var_param_equilibrium_3+=(1e-4) # Tolerance on stress: `tolp0`
+
+
+
+
+# =========================================================================== #
+# INPUT PARAMETERS FOR MAIN SCRIPTS
 
 
 # == Variables for input parameters of `in.DEF_param_sample_preparation_3` == #
@@ -124,6 +161,7 @@ var_param_sample_preparation_3+=(0.45) # Target packing fraction to start slow c
 var_param_sample_preparation_3+=(1e-1) # Inertial number for shrinkage from granular gas to target packing fraction: `In0_percolation`
 var_param_sample_preparation_3+=(0.001) # Average normalized overlap to stop relaxation: `relax_overlap`
 # Equilibrium
+var_param_sample_preparation_3+=(1e3) # Isotropic pressure of sample preparation: `Ppreparation`
 var_param_sample_preparation_3+=(1e-2) # Inertial number for compression to reach target isotropic pressure: `In0_pressure`
 var_param_sample_preparation_3+=(1e-3) # Inertial number for final equilibrium (all convergence criteria): `In0_equilibrium`
 # Particle Size Distribution atomfile file used in the simulation (absolute path)
@@ -134,6 +172,7 @@ file_PSD="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\PSDtemplat
 # = Variables for input parameters of `in.DEF_param_sample_densification_3` = #
 var_param_sample_densification_3=() 
 # Compression at reduced friction
+var_param_sample_densification_3+=(1e3) # Isotropic pressure of sample preparation: `Pdensification`
 var_param_sample_densification_3+=(0.65) # Reduction of friction (between 0 and 1): `friction_reduction`
 var_param_sample_densification_3+=(1e-3) # Inertial number for compression to reach target isotropic pressure: `In0_pressure`
 # Contact separation
@@ -152,22 +191,29 @@ var_param_sample_densification_3+=(1e-3) # Inertial number for final equilibrium
 #in.DEF_param_sample_densification_3 : YES AND DONE !
 # in.DEF_init_material_3 : YES AND DONE !
 # in.DEF_init_boundary_3: YES AND DONE
+# in.DEF_param_simulation_3 : YES AND DONE !
+# in.DEF_param_BC_control : YES AND DONE
+# in.DEF_param_equilibrium_3 : YES AND DONE
 
 
-# in.DEF_init_pre_3 : NO - MAYBE IN THE FUTURE IF WE USE ELLIPSOIDS
-# in.DEF_init_particles_3 : YES - BUT WHEN WE WANT TO DEAL WITH NON-SPHERICAL PARTICLES IN THE FUTURE. KEEP FOR LEGACY AT THE MOMENT
 
-# 
-
-# in.DEF_param_simulation_3 : YES -- UP NEXT !
-# in.DEF_param_BC_control : YES
-# in.DEF_param_equilibrium_3 : YES
 # in.DEF_init_post_3 : NO
 # 
 # in.SET_structure_3 : NO
 # in.SET_boundary_3 : NO
 # in.SET_macro_properties_3 : NO
 # in.SET_conv_3 : NO
+
+# in.DEF_init_pre_3 : NO - MAYBE IN THE FUTURE IF WE USE ELLIPSOIDS
+# in.DEF_init_particles_3 : YES - BUT WHEN WE WANT TO DEAL WITH NON-SPHERICAL PARTICLES IN THE FUTURE. KEEP FOR LEGACY AT THE MOMENT
+
+ 
+
+
+
+
+
+
 
 # We also need to define other input parameters that may be used within a file, like different pressure levels, or values of I0 during different runs
 # Locate the atomfiles if necessary
@@ -196,6 +242,9 @@ mpiexec -n 8 lmp_mpi -in in.MAIN_sample_preparation_3 \
 -var var_param_sample_preparation_3 ${var_param_sample_preparation_3[*]} -var file_PSD "'$file_PSD'" \
 -var var_init_material_3 ${var_init_material_3[*]} \
 -var var_init_boundary_3 ${var_init_boundary_3[*]} -var file_wall "'$file_wall'" \
+-var var_param_simulation_3 ${var_param_simulation_3[*]} \
+-var var_param_BC_control_3 ${var_param_BC_control_3[*]} \
+-var var_param_equilibrium_3 ${var_param_equilibrium_3[*]} \
 -log log.sample_preparation_3.lammps \
 $screen_switch
 
@@ -208,6 +257,9 @@ mpiexec -n 8 lmp_mpi -in in.MAIN_sample_densification_3 \
 -var var_param_sample_densification_3 ${var_param_sample_densification_3[*]} \
 -var var_init_material_3 ${var_init_material_3[*]} \
 -var var_init_boundary_3 ${var_init_boundary_3[*]} -var file_wall "'$file_wall'" \
+-var var_param_simulation_3 ${var_param_simulation_3[*]} \
+-var var_param_BC_control_3 ${var_param_BC_control_3[*]} \
+-var var_param_equilibrium_3 ${var_param_equilibrium_3[*]} \
 -log log.sample_densification_3.lammps \
 $screen_switch
 #wait

@@ -7,6 +7,7 @@
 #
 # comparison with Yade: https://github.com/yade/trunk/blob/master/pkg/dem/PeriIsoCompressor.cpp
 # INFO:
+# - MUST BE CALLED AFTER DEF_param_BC_control_3 IN MAIN SCRIPT
 # - strains are always based on the periodic bounding box since walls are attached to the periodic box and mapped affinely to them
 # - The strain is defined as the 'true' or logarithmic strain. Similar strain definition must be adopted in the simulations
 # - Expansive strains are positive. Contractile strains are negative
@@ -14,7 +15,7 @@
 # TODO:
 # - Determine exact strain-controlled formulas for shear/tilt BC : meanwhile, TEMP solution that only works for 0 tilt strain ! OK since this is what we mostly use anyway with strain control (no tilt of walls)
 # - Define a way that only moves one boundary (like the delta mode). This would be useful to have maximum displacement along boundary and mobilize as much boundary shear as possible if it occurs to be influential. We cannot, let's just define 1 moving wall if we want to do it...
-
+# - Is BC_CONTROL variable serving any purpose?
 
 
 # ---- BOUNDARY CONTROL ---- #

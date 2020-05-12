@@ -54,6 +54,8 @@ variable relax_overlap equal ${var_param_sample_preparation_3} # Average normali
 next var_param_sample_preparation_3
 
 # Equilibrium
+variable Ppreparation equal ${var_param_sample_preparation_3} # Isotropic pressure at which sample is prepared [Pa]
+next var_param_sample_preparation_3
 variable In0_pressure equal ${var_param_sample_preparation_3} # Inertial number for second shrinkage to target isotropic pressure
 next var_param_sample_preparation_3
 variable In0_equilibrium equal ${var_param_sample_preparation_3} # Inertial number for final equilibrium to all convergence criteria at target isotropic pressure

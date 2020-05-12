@@ -1,6 +1,6 @@
 # LAMMPS INPUT FILE CLEANING THE BOUNDARY CONDITIONS CONTROL FOR 3D GRANULAR SYSTEMS IN A GENERIC WAY
 # file: in.STOP_BC_control_3
-# author: JBC @ NORTHWESTERN UNIVERSITY, 07/17/2019
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS A STOP SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE DISCARED FROM THE PREVIOUSLY CALLED CORRESPONDING START SCRIPT
 # THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
@@ -10,7 +10,7 @@
 # - strains are always based on the periodic bounding box since walls are attached to the periodic box and mapped affinely to them
 #
 # TODO:
-# - ...
+# - Is BC_CONTROL variable serving any purpose?
 #
 
 variable BC_CONTROL equal false # BC control inactive

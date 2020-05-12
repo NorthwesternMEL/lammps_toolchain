@@ -16,6 +16,8 @@
 # ---- SAMPLE DENSIFICATION PARAMETERS ---- #
 
 # Compression at reduced friction
+variable Pdensification equal ${var_param_sample_densification_3} # Isotropic pressure at which sample is prepared [Pa]
+next var_param_sample_densification_3
 variable friction_reduction equal ${var_param_sample_densification_3} # Reduction coefficient between 0 and 1
 next var_param_sample_densification_3
 variable In0_pressure equal ${var_param_sample_densification_3} # Inertial number for compression to target isotropic pressure
