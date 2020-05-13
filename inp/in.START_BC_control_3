@@ -11,11 +11,20 @@
 # - strains are always based on the periodic bounding box since walls are attached to the periodic box and mapped affinely to them
 # - The strain is defined as the 'true' or logarithmic strain. Similar strain definition must be adopted in the simulations
 # - Expansive strains are positive. Contractile strains are negative
+# - There is a reason why we do not use fix controller (https://lammps.sandia.gov/doc/fix_controller.html)
+# - I forgot the exact reason over time but it was likely due to the impossibility to limit the velocity
+# - Limiting the velocity by hardcoding 'if' type statement in function definition through hacks such as using bool variables that evalueate to 0/1 was computationally expensive
+# - This motivated the use of fix nve/limit, and the hack of defining velocities by means forces * m/dt and get Verlet time integration to provide the correct velocity
+# 
 #
 # TODO:
 # - Determine exact strain-controlled formulas for shear/tilt BC : meanwhile, TEMP solution that only works for 0 tilt strain ! OK since this is what we mostly use anyway with strain control (no tilt of walls)
 # - Define a way that only moves one boundary (like the delta mode). This would be useful to have maximum displacement along boundary and mobilize as much boundary shear as possible if it occurs to be influential. We cannot, let's just define 1 moving wall if we want to do it...
 # - Is BC_CONTROL variable serving any purpose?
+# - Implement some Poisson's effect in the boundary controller??
+# - Implement some thermo-elastic effects in the boundary controller?
+# - lx or v_lx, make sure everything is consistent
+# -
 
 
 # ---- BOUNDARY CONTROL ---- #
@@ -130,7 +139,7 @@ else &
 
 ## Time integration of the dummy particles
 
-fix time_integration_BC dummy nve/limit $(0.33*(lx+ly+lz)*dt*v_ratemax) # Time integration of volumetric and shear boundaries with velocity/strain rate limit 
+fix time_integration_BC dummy nve/limit $(0.33*(lx+ly+lz)*dt*v_ratemax*sqrt(v_Nb_moving_BC)) # Time integration of volumetric and shear boundaries with velocity/strain rate limit 
 
 jump SELF lbl_end_BC # Skip the boundary control definition with no shear
 
@@ -153,6 +162,6 @@ else &
 
 ## Time integration of the volumetric dummy particle
 
-fix time_integration_BC vdummy nve/limit $(0.33*(lx+ly+lz)*dt*v_ratemax) # Time integration of volumetric and shear boundaries with velocity/strain rate limit 
+fix time_integration_BC vdummy nve/limit $(0.33*(lx+ly+lz)*dt*v_ratemax*sqrt(v_Nb_moving_BC)) # Time integration of volumetric and shear boundaries with velocity/strain rate limit 
 
 label lbl_end_BC

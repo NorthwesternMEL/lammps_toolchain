@@ -20,6 +20,9 @@
 
 # ---- PARAMETERS ---- #
 
+variable READWALL equal true # Variable READWALL shown here for definition purposes.
+# Value irrelevant, must be hard overwritten by MAIN scripts. Only defined here for clarity
+
 variable BC_XX_WALL equal ${var_init_boundary_3} # Wall in XX axis: true for moving wall, false for periodic
 next var_init_boundary_3
 variable BC_YY_WALL equal ${var_init_boundary_3} # Wall in YY axis: true for moving wall, false for periodic

@@ -20,7 +20,7 @@
 
 # ---- LOAD INITIAL SAMPLE ---- #
 include in.DEF_init_IO
-read_restart ${fname_read_restart} # Will need to select where the restart file is coming from
+read_restart ${fname_read_restart}
 
 # ---- DEFINITION OF THE PARAMETERS AND LAMMPS REQUIREMENTS ---- #
 

@@ -1,6 +1,6 @@
 # LAMMPS INPUT FILE DEFINING THE FLAGS FOR BOUNDARY CONDITIONS CONTROL FOR 3D GRANULAR SYSTEMS: AXISYMMETRIC TRIAXIAL STRESS CONDITIONS
 # file: in.PRESET_BC_control_TRIAX_3
-# author: JBC @ NORTHWESTERN UNIVERSITY, 10/10/2019
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS A PRESET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND ARE LOCALLY REDEFINED ACCORDING TO PRESET VALUES
 # THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
@@ -8,11 +8,12 @@
 #
 #
 # INFO:
-# - Users MUST overwrite the BC_ZZ_TARGET value with a user-defined time-dependent strain path
+# - Users MUST overwrite the BC_ZZ_TARGET value with a user-defined time-dependent strain path AFTER this PRESET script is called
+# - v_P0 and not ${P0} to be able to define P0 after we call this PRESET script, which is nice
 #
 # TODO:
-# - 
-# - 
+# - We could use a strain rate that is passed as argument to avoid hardcoded redefinition in files
+# -
 
 variable BC_XX_STRESS_CONTROLLED equal true # BC in XX axis is: true=stress-controlled
 variable BC_YY_STRESS_CONTROLLED equal true # BC in YY axis is: true=stress-controlled
@@ -30,6 +31,7 @@ else &
 "print 'Script Error: boundaries must either all be periodic or all have walls. Flags BC_AXIS_WALL were given $(v_BC_XX_WALL), $(v_BC_YY_WALL) and $(v_BC_ZZ_WALL)'" &
 "quit"
 
+variable Nb_moving_BC equal 3 # All boundaries are moving during triaxial test. Hardcoded: passed to BC controller to adjust maximum velocity of dummy particles
 
 variable BC_XX_TARGET equal v_P0 # Target value of STRESS in XX axis, can be overwritten in the MAIN script after that PRESET script is called
 variable BC_YY_TARGET equal v_P0 # Target value of STRESS in YY axis, can be overwritten in the MAIN script after that PRESET script is called

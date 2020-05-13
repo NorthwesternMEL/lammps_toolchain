@@ -17,10 +17,11 @@
 
 # ---- VALUES OF BOUNDARY CONDITIONS ---- #
 
-# This only serves variable definition purposes
-# Value irrelevant, will be overwritten by MAIN and PRESET scripts. Defined here for clarity
+# These first variables are shown here for definition purposes.
+# Values irrelevant, must be hard overwritten by MAIN and PRESET scripts. Only defined here for clarity
 
 variable BC_CONTROL equal false # If BC CONTROL IS CURRENTLY ACTIVE. false=not active, true=active, ANY PURPOSE ? Why here. It is overwritte in the START, STOP files
+variable Nb_moving_BC equal 3 # Number of moving boundaries. BC controller adjust maximum velocity of dummy particles (nve/limit strain rate * L * sqrt(Nb_moving)). If defined as 3 in uniaxial case (worst case), the maximum strain rate is at most overestimated by a factor sqrt(3) ~1.73
 
 variable BC_XX_STRESS_CONTROLLED equal false # BC in XX axis is: true=stress-controlled, false=strain-controlled
 variable BC_YY_STRESS_CONTROLLED equal false # BC in YY axis is: true=stress-controlled, false=strain-controlled

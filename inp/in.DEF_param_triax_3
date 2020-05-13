@@ -1,0 +1,35 @@
+# LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR THE TRIAXIAL TESTING OF 3D GRANULAR SYSTEMS
+# file: in.DEF_param_triax_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+#
+#
+# INFO :
+# - #?MUST BE DEFINED AFTER DEF_param_material_3 IN MAIN SCRIPT
+# - #?MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
+# - variable `var_param_triax_3` (index-style) is passed to LAMMPS by command line switch -var var_param_triax_3
+#
+# TODO:
+# - 
+# - 
+
+# ---- HEATING COOLING PARAMETERS ---- #
+
+variable COMPRESSION equal ${var_param_triax_3} # flag defining if the triaxial test is performed in compression (true) or extension (false) along z-axis
+next var_param_triax_3
+variable Pconfine equal ${var_param_triax_3} # Confining pressure [Pa]
+next var_param_triax_3
+variable In0_confine equal ${var_param_triax_3} # Inertial number for isotropic compression to confining pressure
+next var_param_triax_3
+variable In0_triax equal ${var_param_triax_3} # Inertial number for axial deformation of triaxial test
+next var_param_triax_3
+variable axialstrain equal ${var_param_triax_3} # Maximum axial engineering strain
+next var_param_triax_3
+variable Noutput_strain equal ${var_param_triax_3} # Increments of strains for which to do thermo and dump output (corresponding timesteps computed in `in.MAIN_test_triax`)
+# NEVER call `next` on the variable at the end of the definitions.
+# This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !
+
+
+
