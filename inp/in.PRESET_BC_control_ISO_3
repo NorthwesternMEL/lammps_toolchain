@@ -9,7 +9,7 @@
 #
 # INFO:
 # - MUST BE CALLED AFTER DEF_param_BC_control_3 IN MAIN SCRIPT
-# - v_P0 and not ${P0} to be able to define P0 after we call this PRESET script, which is nice
+# - v_P0 and not ${P0} to be able to define P0 after we call this PRESET script, and redefine it without calling preset again, which is nice
 #
 # TODO:
 # - 

@@ -1,14 +1,15 @@
 # LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR THE OEDOMETRIC TESTING OF 3D GRANULAR SYSTEMS
 # file: in.DEF_param_oedo_3
-# author: JBC @ NORTHWESTERN UNIVERSITY, 10/16/2019
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
 # THIS SCRIPT MUST ONLY BE CALLED ONE TIME
 #
 #
 # INFO :
-# - #?MUST BE DEFINED AFTER DEF_param_material_3 IN MAIN SCRIPT
-# - #?MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
+# - MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
+# - why index variable under that form?
+# - variable `var_param_oedo_3` (index-style) is passed to LAMMPS by command line switch -var var_param_oedo_3
 #
 # TODO:
 # - 
@@ -16,4 +17,9 @@
 
 # ---- HEATING COOLING PARAMETERS ---- #
 
-variable Poedo index $(10*1e3) $(50*1e3) $(100*1e3) $(250*1e3) $(500*1e3) $(1000*1e3) # Series of increasing overburden vertical pressure [Pa]
+variable In0_oedo equal ${var_param_oedo_3} # Inertial number for the oedometric test
+next var_param_oedo_3
+# In this case, we have multiple pressure levels in variable var_param_oedo
+# We must use next after In0_oedo to get the index variable var_param_oedo to contain the first pressure level to meet
+# The in.MAIN_test_oedo_3 script will take care of going through them with `next var_param_oedo_3` commands until it is exhausted
+

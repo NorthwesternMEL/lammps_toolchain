@@ -89,7 +89,7 @@ include in.STOP_equilibrium_3
 
 # ---- DEFINITION AND SETUP OF THE TRIAXIAL PARAMETERS AND GLOBAL PROPERTIES ---- #
 
-include in.SET_triaxial_3 # Included here as it defines the state where there is zero strain
+include in.SET_triax_3 # Included here as it defines the state where there is zero strain
 
 # ---- STRAIN-CONTROLLED AXIAL STRAIN RATE ---- #
 

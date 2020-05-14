@@ -1,16 +1,17 @@
 # LAMMPS INPUT FILE PERFORMING A UNIAXIAL STRESS-CONTROLLED OEDOMETRIC TEST ON SAMPLES OF 3D GRANULAR SYSTEMS
 # file: in.MAIN_test_oedo_3
-# author: JBC @ NORTHWESTERN UNIVERSITY, 10/16/2019
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS A MAIN SCRIPT # ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
 # THIS SCRIPT MUST ONLY BE CALLED ONE TIME
 #
 #
 # INFO :
-# - Triaxial tests are performed dynamically. The equilibrium is not checked during the test (and viscous damping on floaters is inactive ???)
+# - variable `var_param_oedo_3` (index-style) is passed to LAMMPS by command line switch -var var_param_oedo_3 in script in.DEF_param_oedo_3
+# - in the present MAIN script, it contains all the pressure levels to be reached during the oedometric test
 #
 # TODO:
-# - THE REACHING TARGET PERSSURE PART OF THAT FILE WILL BE SHARED WITH ALL MAIN FILES THAT ARE NOT THE INITIAL ASSEMBLY, SHOULD WE GENERALIZE IT AND EXTERNALIZE IT ?
+# -
 # - NEED SOMETHING SAFER FOR THE WALLS
 
 ####################
@@ -19,13 +20,15 @@
 
 # ---- LOAD INITIAL SAMPLE ---- #
 
-read_restart restart.sample_3
+include in.DEF_init_IO
+read_restart ${fname_read_restart}
 
-# ---- DEFINITION OF THE PARAMETERS ---- #
-#
+# ---- DEFINITION OF THE PARAMETERS AND LAMMPS REQUIREMENTS ---- #
+
+include in.DEF_param_oedo_3
 include in.DEF_init_particles_3
 include in.DEF_init_material_3
-include in.DEF_param_sample_3
+include in.DEF_init_boundary_3
 include in.DEF_param_simulation_3
 include in.DEF_param_BC_control_3
 include in.DEF_param_equilibrium_3
@@ -33,12 +36,7 @@ include in.DEF_init_post_3
 
 # ---- SETUP OF THE BOUNDARY CONDITIONS AND STRUCTURES ---- #
 
-variable BC_XX_WALL equal false # Overwrite default, creates walls
-variable BC_YY_WALL equal false # Overwrite default, creates walls
-variable BC_ZZ_WALL equal false # Overwrite default, creates walls
-
-variable READWALL equal true # determine wall coordinates (if wall) from file
-
+variable READWALL equal true # Read wall coordinates from file. Hardcoded: walls (if any) always read as they existed previously when using a restarted script
 include in.SET_structure_3
 include in.SET_boundary_3
 include in.SET_macro_properties_3
@@ -58,12 +56,12 @@ pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL $
 # ---- DAMPING ---- #
 
 if "${SPHERE}" then &
-"fix damp_particles_visct floaters viscous $(v_visc0particles*2*sqrt(v_msys*v_hertzstiff)) # Translational Global damping of particles" &
-"fix damp_particles_viscr floaters viscous/sphere $(v_visc0particles*0.5*v_dsys^2*sqrt(2*v_msys*v_hertzstiff_rot/5)) # Rotational Global damping of particles" &
-"fix damp_particles_Yade particles cundamp ${damp0particles} ${damp0particles} # Yade Translational and Rotational damping of particles" &
+"fix damp_particles_visct floaters viscous ${viscdamp_lin} # Translational Global damping of particles" &
+"fix damp_particles_viscr floaters viscous/sphere ${viscdamp_rot} # Rotational Global damping of particles" &
+"fix damp_particles_Yade particles cundamp ${cundamp0} ${cundamp0} # Yade Translational and Rotational damping of particles" &
 elif "!${SPHERE}" &
-"fix damp_particles_visct floaters viscous/rigid time_integration_clumps $(v_visc0particles*2*sqrt(v_msys*v_hertzstiff)) $(v_visc0particles*0.5*v_dsys^2*sqrt(2*v_msys*v_hertzstiff_rot/5)) # Global damping of rigid particles" &
-"fix damp_particles_Yade particles cundamp/rigid time_integration_clumps ${damp0particles} ${damp0particles} # Yade Translational and Rotational damping of particles" &
+"fix damp_particles_visct floaters viscous/rigid time_integration_clumps ${viscdamp_lin} ${viscdamp_rot} # Global damping of rigid particles" &
+"fix damp_particles_Yade particles cundamp/rigid time_integration_clumps ${cundamp0} ${cundamp0} # Yade Translational and Rotational damping of particles" &
 else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
 
 
@@ -72,57 +70,29 @@ else "print 'Script Error: flag SPHERE should have value true or false and was g
 # ---- OEDOMETRIC TESTING ---- #
 ################################
 
-# The initial state should be the sample prepared at 1 kPa of isotropic confining pressure # variable P0 equal 1.0*1e3
-
-
-# Output of the results
 
 thermo_style custom step v_voidratio # initialize void ratio
 run 0
 
-include in.DEF_param_oedo_3
-include in.SET_oedo_3 # To get deformation
+include in.SET_oedo_3 # Included here as it defines the state where there is zero strain
 
-variable Pvert equal v_Poedo # Vertical pressure
+## Output initial state
 
-variable In0 equal 1e-4 # Overwrite the inertial number to smaller values for compression
-variable SHEARRELAX equal false # No shear/tilt relax
+thermo_style custom step v_pzz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # N entries to be determined in a uniquely different fashion when compared to other thermo outputs of the log file
+#log log.test_oedo_3 append
+run 0 # Save initial equilibrium state in log file for post-processing
+#log log.lammps append
+
+
 include in.PRESET_BC_control_OEDO_3 # preset oedometric conditions to target pressure
+include in.PRESET_equilibrium_all_3 # Sets equilibrium conditions on all variables
 
-
-variable Nrun equal 100000 # Overwrite loading ramp duration
-variable Nthermo equal 50000 # Overwrite thermo output frequency
-
-
-
-
-## Initial state @ 1 kPa
-
-thermo_style custom step v_pzz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # 7 entries
-log log.test_oedo_3 append
-run 0 # To save state in log file for post-processing
-log log.lammps append
-
-
-### Loop of pressure increases to the values of the Pvert variable ##
+### Loop of pressure increases to the values of the Poedo variable ###
 label lbl_oedo_test
 
-#-- First run, non-equilibrium pressure increase
+variable P0 equal ${var_param_oedo_3} # Reference pressure becomes target vertical pressure stored in `var_param_oedo_3`
+variable In0 equal ${In0_oedo} # Overwrite the inertial number to smaller values for oedometric test
 
-variable pressure equal ramp($(v_P0),$(v_Pvert)) # Increase the pressure from the current pressure (used as P0) to the target vertical pressure Pvert
-variable BC_ZZ_TARGET equal v_pressure # overwrite stress-controlled deformation in the z-direction
-include in.START_BC_control_3 # Start Boundary controller
-thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_epsz v_epsv v_pf v_deltavoidratio
-thermo ${Nthermo}
-run ${Nrun}
-include in.STOP_BC_control_3
-
-# Second run, equilibration at constant pressure
-
-variable P0 equal $(v_Poedo) # Final pressure
-include in.PRESET_BC_control_OEDO_3 # preset oedometric conditions to target pressure, resets reference pressure BC_ZZ_TARGET = P0
-
-include in.PRESET_equilibrium_all_3 # Sets equilibrium conditions on all variables
 include in.START_equilibrium_3 # Start equilibrium check
 include in.START_BC_control_3 # Start Boundary controller
 thermo_style custom step v_convke v_convufr v_convfres v_convtqres v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_epsz v_epsv v_pf v_deltavoidratio
@@ -134,19 +104,10 @@ include in.STOP_equilibrium_3
 
 # Output of the results
 
-thermo_style custom step v_pzz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # 7 entries
-log log.test_oedo_3 append
+thermo_style custom step v_pzz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # N entries to be determined in a uniquely different fashion when compared to other thermo outputs of the log file
+#log log.test_oedo_3 append
 run 0 # To save state in log file for post-processing
-log log.lammps append
+#log log.lammps append
 
-next Poedo
+next var_param_oedo_3 # Gets next pressure level
 jump SELF lbl_oedo_test
-
-
-
-
-
-
-
-
-

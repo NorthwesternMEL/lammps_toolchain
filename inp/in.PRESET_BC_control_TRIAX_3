@@ -9,7 +9,7 @@
 #
 # INFO:
 # - Users MUST overwrite the BC_ZZ_TARGET value with a user-defined time-dependent strain path AFTER this PRESET script is called
-# - v_P0 and not ${P0} to be able to define P0 after we call this PRESET script, which is nice
+# - v_P0 and not ${P0} to be able to define P0 after we call this PRESET script, and redefine it without calling preset again, which is nice
 #
 # TODO:
 # - We could use a strain rate that is passed as argument to avoid hardcoded redefinition in files
