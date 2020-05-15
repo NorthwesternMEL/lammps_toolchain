@@ -1,6 +1,6 @@
 # LAMMPS INPUT FILE PERFORMING THE GRADUAL HEATING OR COOLING FOR ONE SINGLE TEMPERATURE STEP OF OF 3D GRANULAR SYSTEMS
 # file: in.RUN_HC_1step_3
-# author: JBC @ NORTHWESTERN UNIVERSITY, 08/19/2019
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
 # THIS IS ARUN SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE LOCAL AND MUST NOT BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
 # THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
@@ -20,8 +20,8 @@
 
 variable DTinitial equal $(v_DTcurrent)
 
-if "${HEATING}" then "variable DTfinal equal $(v_DTcurrent + v_DTstep)" &
-elif "!${HEATING}" "variable DTfinal equal $(v_DTcurrent - v_DTstep)" &
+if "${HEATING}" then "variable DTfinal equal $(v_DTcurrent + v_DTstep)" "variable Nrun_hc equal ${Nrun_heat}" &
+elif "!${HEATING}" "variable DTfinal equal $(v_DTcurrent - v_DTstep)" "variable Nrun_hc equal ${Nrun_cool}" &
 else "print 'Script Error: variable HEATING should have value true or false and was given $(v_HEATING)'" "quit"
 
 # ---- TEMPERATURE VARIATION RUN ---- #

@@ -12,7 +12,7 @@
 # TODO:
 # - WE MUST MAKE SURE THE SELECTION BETWEEN WALLS AND PBC IS SAFE, RIGHT NOW A SIMULATION RPEPARED WITH WALLS CAN RUN WITH PBC AND THE OPPOSITE AS WELL (CREATING A BIGGER MESS THIS LATTER WAY)
 # - CREATE DEFAULT VALUES OF THE VARIABLES THAT ARE CHANGED BY THE PRESET FiLES, these are overwritten anyway right?
-# - Is BC_CONTROL variable serving any purpose?
+# - 
 
 
 # ---- VALUES OF BOUNDARY CONDITIONS ---- #
@@ -20,7 +20,8 @@
 # These first variables are shown here for definition purposes.
 # Values irrelevant, must be hard overwritten by MAIN and PRESET scripts. Only defined here for clarity
 
-variable BC_CONTROL equal false # If BC CONTROL IS CURRENTLY ACTIVE. false=not active, true=active, ANY PURPOSE ? Why here. It is overwritte in the START, STOP files
+
+variable BC_CONTROL equal false # If BC CONTROL IS CURRENTLY ACTIVE. Informs equilibrium check whether or not to verify pressure equilibrium at boundaries, an alternative/addition would be a BC_FIXED preset
 variable Nb_moving_BC equal 3 # Number of moving boundaries. BC controller adjust maximum velocity of dummy particles (nve/limit strain rate * L * sqrt(Nb_moving)). If defined as 3 in uniaxial case (worst case), the maximum strain rate is at most overestimated by a factor sqrt(3) ~1.73
 
 variable BC_XX_STRESS_CONTROLLED equal false # BC in XX axis is: true=stress-controlled, false=strain-controlled

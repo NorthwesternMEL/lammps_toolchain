@@ -20,7 +20,6 @@
 # TODO:
 # - Determine exact strain-controlled formulas for shear/tilt BC : meanwhile, TEMP solution that only works for 0 tilt strain ! OK since this is what we mostly use anyway with strain control (no tilt of walls)
 # - Define a way that only moves one boundary (like the delta mode). This would be useful to have maximum displacement along boundary and mobilize as much boundary shear as possible if it occurs to be influential. We cannot, let's just define 1 moving wall if we want to do it...
-# - Is BC_CONTROL variable serving any purpose?
 # - Implement some Poisson's effect in the boundary controller??
 # - Implement some thermo-elastic effects in the boundary controller?
 # - lx or v_lx, make sure everything is consistent

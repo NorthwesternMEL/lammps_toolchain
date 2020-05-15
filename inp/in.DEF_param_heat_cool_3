@@ -1,0 +1,57 @@
+# LAMMPS INPUT FILE DEFINING THE PARAMETERS AND FLAGS FOR THE HEATING AND COOLING PROPERTIES OF 3D GRANULAR SYSTEMS
+# file: in.DEF_param_heat_cool_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
+#
+# THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT MUST ONLY BE CALLED ONE TIME
+#
+#
+# INFO :
+# - variable `var_param_heat_cool_3` (index-style) is passed to LAMMPS by command line switch -var var_param_heat_cool_3
+# - MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
+#
+# TODO:
+# - 
+# - 
+
+# ---- HEATING COOLING PARAMETERS ---- #
+
+# Initial compression
+variable COMPRESSION_ISO equal ${var_param_heat_cool_3} # Flag that determines if initial compression is performed under isotropic (true) or oedometric (false) conditions
+next var_param_heat_cool_3
+variable Pheat_cool equal ${var_param_heat_cool_3} # Pressure, if any, isotropic or oedometric maintained during the test [Pa]
+next var_param_heat_cool_3
+variable In0_compression equal ${var_param_heat_cool_3} # Inertial number for the initial compression to the target pressure
+next var_param_heat_cool_3
+
+# Heating - Cooling cycles
+variable Ncycle equal ${var_param_heat_cool_3} # Number of heating - cooling cycles
+next var_param_heat_cool_3
+variable HEATING_FIRST equal ${var_param_heat_cool_3} # Flag that determines if heating (true) or cooling (false) first
+next var_param_heat_cool_3
+variable FIXED equal ${var_param_heat_cool_3} # Flag that determines if heating-cooling cycles are performed at fixed volume
+next var_param_heat_cool_3
+variable HEATCOOL_ISO equal ${var_param_heat_cool_3} # Flag (if FIXED=false) that determines if heating-cooling cycles are performed under isotropic (true) or oedometric (false) conditions
+next var_param_heat_cool_3
+variable In0_heat equal ${var_param_heat_cool_3} # Inertial number during the heating phase
+next var_param_heat_cool_3
+variable In0_cool equal ${var_param_heat_cool_3} # Inertial number during the cooling phase
+next var_param_heat_cool_3
+variable DTtarget equal ${var_param_heat_cool_3} # Temperatuve variation [°C] (absolute value, always positive. Ideally a multiple of DTstep)
+next var_param_heat_cool_3
+variable DTstep equal ${var_param_heat_cool_3} # Temperature increments [°C / heating step]
+next var_param_heat_cool_3
+
+# DEM Simulation parameters
+variable Nrun_heat equal ${var_param_heat_cool_3} # Number of timestep during which the geometry is changed due to heating
+next var_param_heat_cool_3
+variable Nrun_cool equal ${var_param_heat_cool_3} # Number of timestep during which the geometry is changed due to cooling
+next var_param_heat_cool_3
+variable Nevery_hc equal ${var_param_heat_cool_3} # Frequency of geometry change during heating
+# NEVER call `next` on the variable at the end of the definitions.
+# This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !
+
+variable DTcurrent equal 0 # Cumulative global temperature variation from the initial temperature T0 through the multiple runs [K], always start at zero! Overwritten locally
+variable HEATING equal true # flag that must be overwritten when necessary in the script and tell if there is  heating or cooling. false=cooling ; true=heating. Value irrelevant, overwritten in script
+
+

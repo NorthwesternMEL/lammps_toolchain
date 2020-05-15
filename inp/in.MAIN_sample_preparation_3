@@ -268,8 +268,8 @@ dump savedmpcoor particles custom 1 ${fname_write_dump_co} id x y z diameter
 dump_modify savedmpcoor sort id
 
 variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_sample_preparation_3${suffixstr}.lammpstrj${quote}" # Name of topology dump file written with absolute path
-compute savepair particles property/local patom1 patom2 # pairs of particles within force cutoff
-compute savecontact particles pair/local force p4 p10 p11 p12 # interparticle distance, normal force magnitude, tangent force magnitude, branch vector x, y, z
+compute savepair particles property/local patom1 patom2 cutoff radius # pairs of particles within force cutoff
+compute savecontact particles pair/local force p4 p10 p11 p12 cutoff radius # interparticle distance, normal force magnitude, tangent force magnitude, branch vector x, y, z
 dump savedmptopo particles local 1 ${fname_write_dump_topo} c_savepair[*] c_savecontact[*]
 
 run 0 # To output final coordinates and neighbor list

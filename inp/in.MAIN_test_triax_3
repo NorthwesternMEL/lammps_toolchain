@@ -111,6 +111,7 @@ variable BC_ZZ_TARGET equal v_logstrain # Strain-controlled deformation in the z
 
 variable fname_write_dump_triax string "${quote}${pathstr}/dump.co_triaxial_3_${suffixstr}.lammpstrj${quote}" # Name of triaxial dump file written with absolute path
 dump savedmptriax particles custom ${Nthermo_triax} ${fname_write_dump_triax} id x y z diameter
+dump_modify savedmptriax sort id
 
 velocity dummy set 0.0 0.0 0.0 # Stop boundaries
 

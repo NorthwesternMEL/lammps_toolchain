@@ -187,7 +187,7 @@ var_param_sample_densification_3+=(3254) # Random integer seed for velocity of p
 var_param_sample_densification_3+=(1e-3) # Inertial number for final equilibrium (all convergence criteria): `In0_equilibrium`
 
 
-# = Variables for the input parameters of `in.DEF_parax_triax_3` = #
+# = Variables for the input parameters of `in.DEF_param_triax_3` = #
 var_param_triax_3=()
 var_param_triax_3+=(true) # Compression triaxial (false=extension triaxial): `COMPRESSION`
 var_param_triax_3+=(1e3) # Confining pressure to perform the triaxial test [Pa]: `Pconfine`
@@ -197,10 +197,42 @@ var_param_triax_3+=(0.05) # Maximum axial strain (engineering strain, absolute v
 var_param_triax_3+=(0.001) # Frequency of thermo output and dumps, given in axial strain [-]: `Noutput_strain`
 
 
-# = Variables for the input parameters of `in.DEF_parax_oedo_3` = #
+# = Variables for the input parameters of `in.DEF_param_oedo_3` = #
 var_param_oedo_3=()
 var_param_oedo_3+=(1e-4) # Inertial number for oedometric test: `In0_oedo`
 var_param_oedo_3+=("1e3 2e3") # List of pressures to be reached (may be not monotonic) [Pa]: values of index variable var_param_oedo_3 will be directly used to populate `P0` without use of an intermediate variable
+
+
+# = Variables for the input parameters of `in.DEF_param_heat_cool_3` = #
+var_param_heat_cool_3=()
+# Initial compression
+var_param_heat_cool_3+=(true) # Initial compression isotropic (true) or oedometric (false): `COMPRESSION_ISO`
+var_param_heat_cool_3+=(1e3) # Initial pressure level for heating-cooling cycles [Pa]: `Pheat_cool`
+var_param_heat_cool_3+=(1e-4) # Inertial number for initial compression: `In0_compression`
+# Heating - Cooling cycles
+var_param_heat_cool_3+=(1) # Number of cycles: `Ncycle`
+var_param_heat_cool_3+=(true) # Cycle starts with heating: `HEATING_FIRST`
+var_param_heat_cool_3+=(false) # Boundaries are fixed: `FIXED`
+var_param_heat_cool_3+=(false) # Boundary controller is isotropic (true) or oedometric (false): `HEATCOOL_ISO` 
+var_param_heat_cool_3+=(1e-4) # Inertial number for heating phases:`In0_heat`
+var_param_heat_cool_3+=(1e-4) # Inertial number for cooling phases:`In0_heat`
+var_param_heat_cool_3+=(10.0) # Temperature amplitude of the cycles [°C]: `DTtarget`
+var_param_heat_cool_3+=(1.0) # Temperature steps where equilibrium is enforced [°C]: `DTstep`
+# DEM Simulation parameters
+var_param_heat_cool_3+=(50000) # Number of timesteps for heating by `DTsetp` °C: `Nrun_heat`
+var_param_heat_cool_3+=(50000) # Number of timesteps for cooling by `DTsetp` °C: `Nrun_cool`
+var_param_heat_cool_3+=(10) # Frequency of temperature change, in timesteps: `Nevery_hc`
+
+
+
+
+
+
+
+
+
+
+
 
 
 # We need input parameters for basically all the things that are defined in input files:
@@ -218,10 +250,9 @@ var_param_oedo_3+=("1e3 2e3") # List of pressures to be reached (may be not mono
 
 
 
-# in.DEF_param_heating_cooling: YES
+# in.DEF_param_heating_cooling: YES AND NOOOOOOOOOOOOWWWWWWWWWWWWWWWWW DOIIIING !!! BAM !
 
 # in.DEF_init_post_3 : NO
-# 
 # in.SET_structure_3 : NO
 # in.SET_boundary_3 : NO
 # in.SET_macro_properties_3 : NO
@@ -298,18 +329,34 @@ screen_switch='' # LAMMPS thermo output to screen: '-screen none', '-screen <fil
 # -log log.test_triax_3.lammps \
 # $screen_switch
 
-mpiexec -n 8 lmp_mpi -in in.MAIN_test_oedo_3 \
+# mpiexec -n 8 lmp_mpi -in in.MAIN_test_oedo_3 \
+# -var path_out "'$path_out'" \
+# -var fname_suffix "'$fname_suffix'" \
+# -var file_restart "'$file_restart'" \
+# -var var_param_oedo_3 ${var_param_oedo_3[*]} \
+# -var var_init_material_3 ${var_init_material_3[*]} \
+# -var var_init_boundary_3 ${var_init_boundary_3[*]} -var file_wall "'$file_wall'" \
+# -var var_param_simulation_3 ${var_param_simulation_3[*]} \
+# -var var_param_BC_control_3 ${var_param_BC_control_3[*]} \
+# -var var_param_equilibrium_3 ${var_param_equilibrium_3[*]} \
+# -log log.test_oedo_3.lammps \
+# $screen_switch
+
+
+
+mpiexec -n 8 lmp_mpi -in in.MAIN_heat_cool_3 \
 -var path_out "'$path_out'" \
 -var fname_suffix "'$fname_suffix'" \
 -var file_restart "'$file_restart'" \
--var var_param_oedo_3 ${var_param_oedo_3[*]} \
+-var var_param_heat_cool_3 ${var_param_heat_cool_3[*]} \
 -var var_init_material_3 ${var_init_material_3[*]} \
 -var var_init_boundary_3 ${var_init_boundary_3[*]} -var file_wall "'$file_wall'" \
 -var var_param_simulation_3 ${var_param_simulation_3[*]} \
 -var var_param_BC_control_3 ${var_param_BC_control_3[*]} \
 -var var_param_equilibrium_3 ${var_param_equilibrium_3[*]} \
--log log.test_oedo_3.lammps \
+-log log.heat_cool_3.lammps \
 $screen_switch
+
 
 
 
