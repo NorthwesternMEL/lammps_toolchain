@@ -18,8 +18,15 @@
 
 # ---- TOTAL SIMULATION EVOLUTION INFORMATION ---- #
 
-fix diameter0 all store/state 0 diameter # Store initial diameter at the moment the script is called
-variable diameterhc atom "f_diameter0*(1.0+v_lcte*v_DTcurrent)" # Current diameter of the particle after expansion / contraction
+variable inflation_factor equal "(1.0+v_lcte*v_DTcurrent)/(1.0+v_lcte*v_DTprior)"
+fix particle_inflation particles adapt ${Nevery_heat_cool} atom diameter v_inflation_factor scale yes reset no mass no # must use reset no to maintain modified diameters between runs (neighbor list building, dumps etc). Must use mass no to change diameter without changing the mass
+
 variable vol0 equal $(v_vol) # Initial volume at the moment the script is called, before any heating - cooling is performed
 variable epsv equal "v_vol/v_vol0 - 1.0" # Volumetric strain with reference to the first time the present script is called
 
+variable lx0 equal $(v_lx) # Initial length in x direction
+variable ly0 equal $(v_ly) # Initial length in y direction
+variable lz0 equal $(v_lz) # Initial length in z direction
+variable epsx equal "v_lx/v_lx0 - 1.0" # Engineering strain in x direction
+variable epsy equal "v_ly/v_ly0 - 1.0" # Engineering strain in y direction
+variable epsz equal "v_lz/v_lz0 - 1.0" # Engineering strain in z direction

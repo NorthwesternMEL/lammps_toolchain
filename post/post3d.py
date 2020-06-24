@@ -131,7 +131,7 @@ def touch(dmptopo,t):
     if 'fn' in dmptopo.names.keys():
         touchflag = dmptopo.snaps[t].atoms[:,dmptopo.names['fn']] > 0.0 # Pairs in strict contact have a strictly positive normal force
     elif all(branch in dmptopo.names.keys() for branch in ['lx','ly','lz']):
-        touchflag = dmptopo.snaps[t].atoms[:,dmptopo.names['lx']] != 0.0 and dmptopo.snaps[t].atoms[:,dmptopo.names['ly']] != 0.0 and dmptopo.snaps[t].atoms[:,dmptopo.names['lz']] != 0.0 # Pairs in strict contact have all branch vector components non-zero
+        touchflag = np.logical_and.reduce((dmptopo.snaps[t].atoms[:,dmptopo.names['lx']] != 0.0, dmptopo.snaps[t].atoms[:,dmptopo.names['ly']] != 0.0, dmptopo.snaps[t].atoms[:,dmptopo.names['lz']] != 0.0)) # Pairs in strict contact have all branch vector components non-zero
     else:
         raise KeyError("The dump file and dictionary lack keys to determine particles in contact")
     ncontact = np.count_nonzero(touchflag) # Number of contacts

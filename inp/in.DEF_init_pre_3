@@ -20,6 +20,6 @@
 units si # SI units kg, m, s
 dimension 3 # 3D systems
 boundary p p p # Periodic Boundary Conditions, always used even if walls: walls mapped to periodic cell
-atom_style sphere # Use spherical particles or clumps of spherical particles
+atom_style sphere 1 # Use spherical particles or clumps of spherical particles
 comm_modify	vel yes # Necessary for granular simulations
 atom_modify map yes # Necessary for indexing purposes

@@ -7,13 +7,13 @@
 #
 #
 # INFO :
-# - We might think of distinc temperature amplitudes in the future, i.e. progressive heating, progressive cooling?
+# -
 #
 # TODO:
 # - THE REACHING TARGET PERSSURE PART OF THAT FILE WILL BE SHARED WITH ALL MAIN FILES THAT ARE NOT THE INITIAL ASSEMBLY, SHOULD WE GENERALIZE IT AND EXTERNALIZE IT ?
 # - NEED SOMETHING SAFER FOR THE WALLS, not sure what I meant by that when I wrote it
 # - figure out mindlin_rescale
-# - We might think of distinc temperature amplitudes in the future, i.e. progressive heating, progressive cooling?
+# - We might think of distinc temperature amplitudes in the future, i.e. progressive heating, progressive cooling
 
 ####################
 # ---- HEADER ---- #
@@ -98,29 +98,27 @@ velocity dummy set 0.0 0.0 0.0 # Stop boundaries motion
 
 # ---- DEFINITION AND SETUP OF THE HEATING / COOLING PARAMETERS AND GLOBAL PROPERTIES ---- #
 
-include in.SET_heat_cool_3 # Included here as it defines the state where there is zero strain
+include in.SET_heat_cool_3 # Included here as it defines the state where there is zero strain and reference temperature
 
 compute final_geometry particles property/local patom1 patom2 cutoff radius # Determines the contact topology
 compute final_topology particles pair/local force p4 p10 p11 p12 cutoff radius # Determines the contact properties
 
-
-# ---- INITIAL STATE BEFORE CYCLES ---- #
-
 variable fname_write_dump_co string "${quote}${pathstr}/dump.co_sample_before_cycles_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
 variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_before_cycles_3${suffixstr}.lammpstrj${quote}" # Name of topology dump file written with absolute path
 
+# ---- INITIAL STATE BEFORE CYCLES ---- #
+
 thermo_style custom step v_DTcurrent v_epsv v_pf v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz # 10 entries
-dump dump_co particles custom 1 ${fname_write_dump_co} id x y z radius diameter
+dump dump_co particles custom 1 ${fname_write_dump_co} id x y z diameter
 dump_modify dump_co sort id
 dump dump_topo particles local 1 ${fname_write_dump_topo} c_final_geometry[*] c_final_topology[*]
-log log.hc3 # Do not append the first one, so that the file is overwritten each simulation
 run 0 # To save state in log file for post-processing
-log log.lammps append
 undump dump_co
 undump dump_topo
 
-
 # ---- HEATING - COOLING CYLES ---- #
+
+print "                                               WARNING: THE VALUES OF Nrun AND Ndump ARE OVERWRITTEN"
 
 variable cycleloop loop ${Ncycle} # Ncycle cycles of heating and cooling
 label labelcycleloop
@@ -132,11 +130,15 @@ label labelcycleloop
     "variable HEATING equal true # Heating -> increase particles dimensions" &
     "variable In0 equal ${In0_heat} # Overwrite the inertial number for heating phase" &
     "variable heat_cool_str string heating # For output files naming" &
+    "variable Nrun equal ${Nrun_heat}" &
+    "variable DTramp equal ${DTstep}" &
     "print '					HEATING'" &
     elif "(!${HEATING_FIRST} && ${phaseloop}==1) || (${HEATING_FIRST} && ${phaseloop}==2)" &
     "variable HEATING equal false # Cooling -> decrease particles dimensions" &
     "variable In0 equal ${In0_cool} # Overwrite the inertial number for cooling phase" &
     "variable heat_cool_str string cooling # For output files naming" &
+    "variable DTramp equal -${DTstep}" &
+    "variable Nrun equal ${Nrun_cool}" &
     "print '					COOLING'" &
     else "print 'Script Error: flag HEATING_FIRST should have value true or false and was given $(v_HEATING_FIRST)'" "quit"
     
@@ -144,14 +146,20 @@ label labelcycleloop
     label labelsteploop
     
       #Boundary conditions
-      if "${HEATCOOL_ISO}" then "include in.PRESET_BC_control_ISO_3 # preset isotropic conditions during heatin/cooling" &
+      if "${HEATCOOL_ISO}" then "include in.PRESET_BC_control_ISO_3 # preset isotropic conditions during heating/cooling" &
       elif "!${HEATCOOL_ISO}" "include in.PRESET_BC_control_OEDO_3 # preset oedometric conditions during heating/cooling" &
       else "print 'Script Error: flag HEATCOOL_ISO should have value true or false and was given $(v_HEATCOOL_ISO)'" "quit"
       
       # Temperature variation ramp
       if "!${FIXED}" then "include in.START_BC_control_3 # Start boundary controller only if simulation not in fixed box"
       thermo_style custom step v_DTcurrent v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz
-      include in.RUN_HC_1step_3
+      variable DTstart equal ${DTcurrent}
+      variable DTstop equal $(v_DTstart+v_DTramp)
+      variable DTcurrent equal ramp(${DTstart},${DTstop})
+      thermo ${Nthermo}
+      run ${Nrun}
+      variable DTcurrent equal ${DTstop}
+      variable DTprior equal ${DTcurrent}
       if "!${FIXED}" then "include in.STOP_BC_control_3 # Stop boundary controller only if simulation not in fixed box"
       
       # Equilibrium
@@ -174,12 +182,9 @@ label labelcycleloop
       dump dump_co particles custom 1 ${fname_write_dump_co} id x y z radius diameter
       dump_modify dump_co sort id
       dump dump_topo particles local 1 ${fname_write_dump_topo} c_final_geometry[*] c_final_topology[*]
-      log log.hc3 append
       run 0 # To save state in log file for post-processing
-      log log.lammps append
       undump dump_co
       undump dump_topo
-      
       
     next steploop
     jump SELF labelsteploop

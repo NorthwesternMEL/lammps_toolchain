@@ -41,17 +41,22 @@ variable DTtarget equal ${var_param_heat_cool_3} # Temperatuve variation [°C] (
 next var_param_heat_cool_3
 variable DTstep equal ${var_param_heat_cool_3} # Temperature increments [°C / heating step]
 next var_param_heat_cool_3
+variable DTcurrent equal ${var_param_heat_cool_3} # Cumulative temperature variation from the initial temperature [K]. Overwritten locally during heating/cooling. Might be non-zero for restarted simulations
+next var_param_heat_cool_3
+variable DTprior equal ${var_param_heat_cool_3} # Cumulative temperature variation at the beginning of the current temperature variation step [K]. Overwritten locally during heating/cooling. Might be non-zero for restarted simulations
+next var_param_heat_cool_3
+
+variable HEATING equal true # flag that must be overwritten when necessary in the script and tell if there is  heating or cooling. false=cooling ; true=heating. For definition/clarity purposes, value irrelevant, overwritten in script
+
 
 # DEM Simulation parameters
 variable Nrun_heat equal ${var_param_heat_cool_3} # Number of timestep during which the geometry is changed due to heating
 next var_param_heat_cool_3
 variable Nrun_cool equal ${var_param_heat_cool_3} # Number of timestep during which the geometry is changed due to cooling
 next var_param_heat_cool_3
-variable Nevery_hc equal ${var_param_heat_cool_3} # Frequency of geometry change during heating
+variable Nevery_heat_cool equal ${var_param_heat_cool_3} # Frequency of geometry change during heating/cooling
 # NEVER call `next` on the variable at the end of the definitions.
 # This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !
 
-variable DTcurrent equal 0 # Cumulative global temperature variation from the initial temperature T0 through the multiple runs [K], always start at zero! Overwritten locally
-variable HEATING equal true # flag that must be overwritten when necessary in the script and tell if there is  heating or cooling. false=cooling ; true=heating. Value irrelevant, overwritten in script
 
 
