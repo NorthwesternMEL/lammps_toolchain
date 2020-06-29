@@ -70,6 +70,8 @@ else "print 'Script Error: flag SPHERE should have value true or false and was g
 # ---- OEDOMETRIC TESTING ---- #
 ################################
 
+variable fname_write_log string "${quote}${pathstr}/log.test_oedo_3${suffixstr}.lammps${quote}" # Name of the log file. Consistent with definition in `script_test_oedo_3`
+variable fname_write_log_eq string "${quote}${pathstr}/log.test_oedo_3_eq${suffixstr}.lammps${quote}" # Name of the log file for the equilibrium snapshots. Consistent with definition in `script_test_oedo_3`
 
 thermo_style custom step v_voidratio # initialize void ratio
 run 0
@@ -79,9 +81,9 @@ include in.SET_oedo_3 # Included here as it defines the state where there is zer
 ## Output initial state
 
 thermo_style custom step v_pzz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # N entries to be determined in a uniquely different fashion when compared to other thermo outputs of the log file
-#log log.test_oedo_3 append
+log ${fname_write_log_eq}
 run 0 # Save initial equilibrium state in log file for post-processing
-#log log.lammps append
+log ${fname_write_log} append
 
 
 include in.PRESET_BC_control_OEDO_3 # preset oedometric conditions to target pressure
@@ -105,9 +107,9 @@ include in.STOP_equilibrium_3
 # Output of the results
 
 thermo_style custom step v_pzz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # N entries to be determined in a uniquely different fashion when compared to other thermo outputs of the log file
-#log log.test_oedo_3 append
+log ${fname_write_log_eq} append
 run 0 # To save state in log file for post-processing
-#log log.lammps append
+log ${fname_write_log} append
 
 next var_param_oedo_3 # Gets next pressure level
 jump SELF lbl_oedo_test

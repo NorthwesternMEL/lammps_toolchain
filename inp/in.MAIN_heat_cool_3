@@ -106,15 +106,22 @@ compute final_topology particles pair/local force p4 p10 p11 p12 cutoff radius #
 variable fname_write_dump_co string "${quote}${pathstr}/dump.co_sample_before_cycles_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
 variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_before_cycles_3${suffixstr}.lammpstrj${quote}" # Name of topology dump file written with absolute path
 
+variable fname_write_log string "${quote}${pathstr}/log.heat_cool_3${suffixstr}.lammps${quote}" # Name of the log file. Consistent with definition in `script_heat_cool_3`
+variable fname_write_log_eq string "${quote}${pathstr}/log.heat_cool_3_eq${suffixstr}.lammps${quote}" # Name of the log file for the equilibrium snapshots. Consistent with definition in `script_heat_cool_3`
+
+
 # ---- INITIAL STATE BEFORE CYCLES ---- #
 
 thermo_style custom step v_DTcurrent v_epsv v_pf v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz # 10 entries
 dump dump_co particles custom 1 ${fname_write_dump_co} id x y z diameter
 dump_modify dump_co sort id
 dump dump_topo particles local 1 ${fname_write_dump_topo} c_final_geometry[*] c_final_topology[*]
+log ${fname_write_log_eq}
 run 0 # To save state in log file for post-processing
+log ${fname_write_log} append
 undump dump_co
 undump dump_topo
+
 
 # ---- HEATING - COOLING CYLES ---- #
 
@@ -152,7 +159,7 @@ label labelcycleloop
       
       # Temperature variation ramp
       if "!${FIXED}" then "include in.START_BC_control_3 # Start boundary controller only if simulation not in fixed box"
-      thermo_style custom step v_DTcurrent v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz
+      thermo_style custom step v_DTcurrent v_epsv v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz
       variable DTstart equal ${DTcurrent}
       variable DTstop equal $(v_DTstart+v_DTramp)
       variable DTcurrent equal ramp(${DTstart},${DTstop})
@@ -182,7 +189,9 @@ label labelcycleloop
       dump dump_co particles custom 1 ${fname_write_dump_co} id x y z radius diameter
       dump_modify dump_co sort id
       dump dump_topo particles local 1 ${fname_write_dump_topo} c_final_geometry[*] c_final_topology[*]
+      log ${fname_write_log_eq} append
       run 0 # To save state in log file for post-processing
+      log ${fname_write_log} append
       undump dump_co
       undump dump_topo
       
