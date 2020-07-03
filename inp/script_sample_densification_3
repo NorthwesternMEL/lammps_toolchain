@@ -30,6 +30,6 @@ $lmp_run \
 -var var_param_simulation_3 ${var_param_simulation_3[*]} \
 -var var_param_BC_control_3 ${var_param_BC_control_3[*]} \
 -var var_param_equilibrium_3 ${var_param_equilibrium_3[*]} \
--log "${path_out}/log.sample_densification_3${fname_suffix}.lammps" \
+-log "${path_out}/log.sample_densification_${var_param_sample_densification_3[1]}_3${fname_suffix}.lammps" \
 -echo $echo_option \
 $screen_option

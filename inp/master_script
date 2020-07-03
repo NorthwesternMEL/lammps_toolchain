@@ -54,7 +54,7 @@
 path_in="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp"
 
 # Path to the folder where output files (dump,restart,data,log,wall) are saved
-path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir" # `pathstr`
+path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\oedo_test" # `pathstr`
 
 # Suffix appended to output files (dump,restart,data,log,wall): no white space!
 fname_suffix="" # If no suffix, use empty string ""
@@ -121,7 +121,7 @@ var_param_simulation_3+=(0.01) # Viscous damping factor for viscous damping of f
 var_param_simulation_3+=(100000) # Number of timestep of classic finite run: `Nrun`
 var_param_simulation_3+=(10000000) # Maximum number of timestep of a converging run: `Nmax`
 var_param_simulation_3+=(10000) # Frequency (in number of timesteps) of checks (e.g., equilibrium checks): `Ncheck`
-var_param_simulation_3+=(1000) # Frequency (in number of timesteps) of thermo output: `Nthermo`
+var_param_simulation_3+=(10000) # Frequency (in number of timesteps) of thermo output: `Nthermo`
 var_param_simulation_3+=(10000) # Frequency (in number of timesteps) of dump output: `Ndump`
 
 
@@ -185,10 +185,10 @@ file_PSD="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\PSDtemplat
 var_param_sample_densification_3=() 
 # Compression at reduced friction
 var_param_sample_densification_3+=(1e3) # Isotropic pressure of sample preparation [Pa]: `Pdensification`
-var_param_sample_densification_3+=(0.65) # Reduction of friction (between 0 and 1): `friction_reduction`
+var_param_sample_densification_3+=(0.75) # Reduction of friction (between 0 and 1): `friction_reduction`
 var_param_sample_densification_3+=(1e-3) # Inertial number for compression to reach target isotropic pressure: `In0_pressure`
 # Contact separation
-var_param_sample_densification_3+=(false) # Flag for contact separation after compression at reduced friction: `BREAKCONTACT`
+var_param_sample_densification_3+=(true) # Flag for contact separation after compression at reduced friction: `BREAKCONTACT`
 var_param_sample_densification_3+=(0.001) # Magnitude of uniform scaling to separate contacts: `contact_expansion`
 var_param_sample_densification_3+=(1e-4) # Magnitude of the mean mixing velocity as a ratio of average diameter and characteristic time (must be very small): `mixintensity`
 var_param_sample_densification_3+=(3254) # Random integer seed for velocity of particles mixing: `mixseed`
@@ -209,7 +209,7 @@ var_param_triax_3+=(0.001) # Frequency of thermo output and dumps, given in axia
 # = Variables for the input parameters of `in.DEF_param_oedo_3` = #
 var_param_oedo_3=()
 var_param_oedo_3+=(1e-4) # Inertial number for oedometric test: `In0_oedo`
-var_param_oedo_3+=("1e3 2e3") # List of pressures to be reached (may be not monotonic) [Pa]: values of index variable var_param_oedo_3 will be directly used to populate `P0` without use of an intermediate variable
+var_param_oedo_3+=("1e3 2e3 3e3 4e3 5e3") # List of pressures to be reached (may be not monotonic) [Pa]: values of index variable var_param_oedo_3 will be directly used to populate `P0` without use of an intermediate variable
 
 
 # = Variables for the input parameters of `in.DEF_param_heat_cool_3` = #
@@ -232,7 +232,7 @@ var_param_heat_cool_3+=(0.0) # Cumulative temperature variation at beginning of 
 # DEM Simulation parameters
 var_param_heat_cool_3+=(25000) # Number of timesteps for heating by `DTsetp` °C: `Nrun_heat`
 var_param_heat_cool_3+=(25000) # Number of timesteps for cooling by `DTsetp` °C: `Nrun_cool`
-var_param_heat_cool_3+=(10) # Frequency of temeprature change, in timesteps: `Nevery_heat_cool`
+var_param_heat_cool_3+=(1) # Frequency of temeprature change, in timesteps: `Nevery_heat_cool`
 
 
 
@@ -274,7 +274,7 @@ fi
 
 # You can change some of the parameters values between the simulations
 
-#source script_test_oedo_3
+source script_test_oedo_3
 # wait
 
 # You can change some of the parameters values between the simulations

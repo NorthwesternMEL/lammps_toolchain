@@ -73,6 +73,9 @@ else "print 'Script Error: flag SPHERE should have value true or false and was g
 variable fname_write_log string "${quote}${pathstr}/log.test_oedo_3${suffixstr}.lammps${quote}" # Name of the log file. Consistent with definition in `script_test_oedo_3`
 variable fname_write_log_eq string "${quote}${pathstr}/log.test_oedo_3_eq${suffixstr}.lammps${quote}" # Name of the log file for the equilibrium snapshots. Consistent with definition in `script_test_oedo_3`
 
+compute final_geometry particles property/local patom1 patom2 cutoff radius # Determines the contact topology
+compute final_topology particles pair/local force p4 p10 p11 p12 cutoff radius # Determines the contact properties
+
 thermo_style custom step v_voidratio # initialize void ratio
 run 0
 
@@ -80,7 +83,7 @@ include in.SET_oedo_3 # Included here as it defines the state where there is zer
 
 ## Output initial state
 
-thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_epsx v_epsy v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # 16 entries
+thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # 16 entries
 log ${fname_write_log_eq}
 run 0 # Save initial equilibrium state in log file for post-processing
 log ${fname_write_log} append
@@ -92,24 +95,35 @@ include in.PRESET_equilibrium_all_3 # Sets equilibrium conditions on all variabl
 ### Loop of pressure increases to the values of the Poedo variable ###
 label lbl_oedo_test
 
-variable P0 equal ${var_param_oedo_3} # Reference pressure becomes target vertical pressure stored in `var_param_oedo_3`
-variable In0 equal ${In0_oedo} # Overwrite the inertial number to smaller values for oedometric test
+  variable P0 equal ${var_param_oedo_3} # Reference pressure becomes target vertical pressure stored in `var_param_oedo_3`
+  variable In0 equal ${In0_oedo} # Overwrite the inertial number to smaller values for oedometric test
 
-include in.START_equilibrium_3 # Start equilibrium check
-include in.START_BC_control_3 # Start Boundary controller
-thermo_style custom step v_convke v_convufr v_convfres v_convtqres v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_epsz v_epsv v_pf v_deltavoidratio
-thermo ${Nthermo}
-run ${Nmax} # Will be stopped at equilibrium
+  include in.START_equilibrium_3 # Start equilibrium check
+  include in.START_BC_control_3 # Start Boundary controller
+  thermo_style custom step v_convke v_convufr v_convfres v_convtqres v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_epsz v_epsv v_pf v_deltavoidratio
+  thermo ${Nthermo}
+  run ${Nmax} # Will be stopped at equilibrium
 
-include in.STOP_BC_control_3
-include in.STOP_equilibrium_3
+  include in.STOP_BC_control_3
+  include in.STOP_equilibrium_3
 
-# Output of the results
-
-thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_epsx v_epsy v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # 16 entries
-log ${fname_write_log_eq} append
-run 0 # To save state in log file for post-processing
-log ${fname_write_log} append
+  # Output of the results
+  variable pzz_kpa equal v_P0/1000
+  variable pzzstr string $(v_pzz_kpa:%4.0f) # string of Pressure level in kPa
+  variable fname_write_restart string "${quote}${pathstr}/restart.sample_oedo_P${pzzstr}kPa_3${suffixstr}${quote}" # Name of restart file written with absolute path
+  variable fname_write_dump_co string "${quote}${pathstr}/dump.co_sample_oedo_P${pzzstr}kPa_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
+  variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_sample_oedo_P${pzzstr}kPa_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
+      
+  thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # 16 entries
+  dump dump_co particles custom 1 ${fname_write_dump_co} id x y z radius diameter
+  dump_modify dump_co sort id
+  dump dump_topo particles local 1 ${fname_write_dump_topo} c_final_geometry[*] c_final_topology[*]
+  log ${fname_write_log_eq} append
+  run 0 # To save state in log file for post-processing
+  log ${fname_write_log} append
+  undump dump_co
+  undump dump_topo
 
 next var_param_oedo_3 # Gets next pressure level
 jump SELF lbl_oedo_test
+
