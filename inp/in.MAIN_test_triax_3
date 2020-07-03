@@ -116,7 +116,7 @@ dump_modify savedmptriax sort id
 velocity dummy set 0.0 0.0 0.0 # Stop boundaries
 
 include in.START_BC_control_3 # Start imposing triaxial boundary conditions
-thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_epsx v_epsy v_epsz v_epsv v_pf
+thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_epsx v_epsy v_epsz v_epsv v_pf # 14 entries
 thermo ${Nthermo_triax}
 run ${Nrun_triax} # Will be stopped at equilibrium
 include in.STOP_BC_control_3

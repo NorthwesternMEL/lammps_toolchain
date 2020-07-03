@@ -8,23 +8,29 @@ module: post3d.py
 
 Python 2 post-processing functions for LAMMPS 3-dimensional DEM simulations
 Obtain geometry and topology descriptors from LAMMPS fump files
-The geometry dump *MUST* be ordered by atom id
+The geometry dump *MUST* be ordered by atom id (dump_modify sort id)
 
 The naming of the variables in the dump columns is overwritten using dictionaries as:
     - Geometry dump:
         x,y,z: particle coordinates
         radius, diameter: radius, diameter of the particle
-        
-        
-        
-        
+
+
+
+
     - Topology dump:
         id1, id2: the atom ID of particles 1 and 2 in the given contact
         fn: the normal force of the contact
         ft: the tangent force of the contact
         dist: the distance between particles id1 and id2
         lx,ly,lz: the components of the branch vector from particle id2 towards particle id1
-    
+
+The naming of the variables in the log columns has no fixed standard.
+It is recommended to use the following (out of habit):
+    - epsx,epsy,epsz,epsv: x, y, z and volumetric engineering strain
+    - evoid: void ratio
+    - pxx,pyy,pzz,pxy,pxz,pyz: xx, yy, zz, xy, xz and yz stress tensor components
+    - press,qdev: mean stress and deviatoric stress ( q = sqrt(3*J_2) )
 
 TODO:
     - 
@@ -376,15 +382,15 @@ def force_distribution(dmptopo,Nsample,fn_range,mob_range,mu):
     Computes the force distributions, normal force and mobilized friction
     todo:
         - check for id1 id2
-        - figure out a smart way to get the force distributions without saving the same data multiple times in memory
-        
+        - figure out a smart way to get the force distributions without saving the same data multiple times in memory. Is it done? I lost track...
+
     INPUT:
     dmptopo: Dump of the contacts topology [dump class from Pizza]
     Nsample: number of sampling points (bins) for the distributions
     fn_range: range of the investigated normal force (normalized by its mean), tuple (min(fn/fnmean) , max(fn/fnmean)): bounds [0;Large finite number]
     mob_range: range of the investigated mobilized friction, tuple (min(mob) , max(mob)),: bounds [0;1]
     mu: Coulomb friction limit for the contact between the solid particles [-]
-    
+
 
     OUTPUT:
     fn_bins: Nsample+1 values of the bin edges of normal force (normalized by mean value), common to all snapshots
@@ -460,6 +466,36 @@ def force_distribution(dmptopo,Nsample,fn_range,mob_range,mu):
             'mob_cumul': mob_cumul,
             'mob_density':mob_density}
     
+# --------------------------------------------------------------------------- #
+
+def read_log(lg,dic):
+    """
+    Reads and saves the data of a single log file.
+    Only the data from the dictionary are saved
+    todo:
+        - figure out a smart way to get the force distributions without saving the same data multiple times in memory
+
+    INPUT:
+    lg: Log file, MUST be single file [log (or log_duplicate) class from Pizza]
+    dic: Dictionary of column variables (keys) and columns number (value, starting from 1) of the log file `lg` that are saved [Python Dictionary]
+
+
+
+    OUTPUT:
+    <key>: values of the corresponding key of the input dictionary
+    """
+
+
+    Nsnaps = lg.nlen # Number of snapshot in the log `lg`
+    list_data = [np.array([])]*len(dic) # List of output data
+
+    for t in range(Nsnaps):
+        for m in range(len(dic)):
+            icol = dic.values()[m]-1
+            list_data[m] = np.append(list_data[m],lg.data[t][icol])
+
+    return {dic.keys()[i]:list_data[i] for i in range(len(dic))}
+
 # --------------------------------------------------------------------------- #
 
 

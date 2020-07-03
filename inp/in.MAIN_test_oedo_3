@@ -80,7 +80,7 @@ include in.SET_oedo_3 # Included here as it defines the state where there is zer
 
 ## Output initial state
 
-thermo_style custom step v_pzz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # N entries to be determined in a uniquely different fashion when compared to other thermo outputs of the log file
+thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_epsx v_epsy v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # 16 entries
 log ${fname_write_log_eq}
 run 0 # Save initial equilibrium state in log file for post-processing
 log ${fname_write_log} append
@@ -106,7 +106,7 @@ include in.STOP_equilibrium_3
 
 # Output of the results
 
-thermo_style custom step v_pzz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # N entries to be determined in a uniquely different fashion when compared to other thermo outputs of the log file
+thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_epsx v_epsy v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # 16 entries
 log ${fname_write_log_eq} append
 run 0 # To save state in log file for post-processing
 log ${fname_write_log} append

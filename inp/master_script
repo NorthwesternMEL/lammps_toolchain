@@ -39,12 +39,14 @@
 #
 # - TODO:
 # - implement suffix and package for omp or intel acceleration
-# -
+# - Homogenization of the Ndump, Nthermo, Nchecks etc output
 #
 # =========================================================================== #
 #
 
-# == GENERAL PATHS TO DIRECT THE WORKFLOW OF FILES == #
+# =========================================================================== #
+# GENERAL PATHS TO DIRECT THE WORKFLOW OF FILES
+# =========================================================================== #
 #
 # Path must be read on their own by LAMMPS command line swtch in order to get the parsing with white space
 #
@@ -66,6 +68,14 @@ mkdir "$path_out" # Creates the output directory
 # make a try/catch command 1 || command 2 if dir exists and rm*? NO !!! what if we run from a folder where there are stuff in? Or ask delete or not delete?
 cd "$path_in"
 
+
+# =========================================================================== #
+# INPUT PARAMETERS FOR DEF SCRIPTS
+# =========================================================================== #
+
+# TODO: INPUT FILES NEEDING / NOT NEEDING A CORRESPONDING VARIABLE ENTRY:
+# - in.DEF_init_pre_3 : NO - MAYBE IN THE FUTURE IF WE USE REAL ELLIPSOIDS
+# - in.DEF_init_particles_3 : YES - BUT WHEN WE WANT TO DEAL WITH NON-SPHERICAL PARTICLES IN THE FUTURE. THIS FILE KEPT SOLELY FOR LEGACY OF CLUMPS AT THE MOMENT
 
 
 # THE ORDER IS CRUCIAL !!! LAMMPS READS THE VALUES ONE AFTER THE OTHER
@@ -135,7 +145,6 @@ var_param_equilibrium_3+=(1e-4) # Tolerance on residual force: `tolfres0`
 var_param_equilibrium_3+=(1e-4) # Tolerance on residual torque: `toltqres0`
 var_param_equilibrium_3+=(1e-5) # Tolerance on Unbalanced Force Ratio (UFR): `tolufr0`
 var_param_equilibrium_3+=(1e-4) # Tolerance on stress: `tolp0`
-
 
 
 
@@ -224,53 +233,6 @@ var_param_heat_cool_3+=(0.0) # Cumulative temperature variation at beginning of 
 var_param_heat_cool_3+=(25000) # Number of timesteps for heating by `DTsetp` °C: `Nrun_heat`
 var_param_heat_cool_3+=(25000) # Number of timesteps for cooling by `DTsetp` °C: `Nrun_cool`
 var_param_heat_cool_3+=(10) # Frequency of temeprature change, in timesteps: `Nevery_heat_cool`
-
-
-
-
-
-
-
-
-
-
-
-
-# We need input parameters for basically all the things that are defined in input files:
-# INPUT FILES NEEDING / NOT NEEDING A CORRESPONDING VARIABLE ENTRY:
-# in.DEF_param_sample_preparation_3 : YES AND DONE
-# in.DEF_param_sample_densification_3 : YES AND DONE
-# in.DEF_init_material_3 : YES AND DONE
-# in.DEF_init_boundary_3: YES AND DONE
-# in.DEF_param_simulation_3 : YES AND DONE
-# in.DEF_param_BC_control : YES AND DONE
-# in.DEF_param_equilibrium_3 : YES AND DONE
-# in.DEF_param_triax_3 : YES AND DONE
-# in.DEF_param_oedo: YES - AND DONE
-
-
-
-
-# in.DEF_param_heating_cooling: YES AND NOOOOOOOOOOOOWWWWWWWWWWWWWWWWW DOIIIING !!! BAM !
-
-# in.DEF_init_post_3 : NO
-# in.SET_structure_3 : NO
-# in.SET_boundary_3 : NO
-# in.SET_macro_properties_3 : NO
-# in.SET_conv_3 : NO
-# in.SET_oedo_3 : NO
-# in.SET_triaxial_3 : NO
-
-
-# in.DEF_init_pre_3 : NO - MAYBE IN THE FUTURE IF WE USE ELLIPSOIDS
-# in.DEF_init_particles_3 : YES - BUT WHEN WE WANT TO DEAL WITH NON-SPHERICAL PARTICLES IN THE FUTURE. KEEP FOR LEGACY AT THE MOMENT
-
-# THE PARAMETERS FOR SAMPLE PREPARATION AND SAMPLE DENSIFICATION WOULD NOT BE NEEDED FOR OTHER master scripts. Where should we use them? We should put them here still, for documentation purposes, have a massive bulk of parameters and pick the ones we need
-
-# Homogenization of the Ndump, Nthermo, Nchecks etc output
-
-
-
 
 
 

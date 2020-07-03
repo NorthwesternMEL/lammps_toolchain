@@ -112,7 +112,7 @@ variable fname_write_log_eq string "${quote}${pathstr}/log.heat_cool_3_eq${suffi
 
 # ---- INITIAL STATE BEFORE CYCLES ---- #
 
-thermo_style custom step v_DTcurrent v_epsv v_pf v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz # 10 entries
+thermo_style custom step v_DTcurrent v_epsx v_epsy v_epsz v_epsv v_pf v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz # 15 entries
 dump dump_co particles custom 1 ${fname_write_dump_co} id x y z diameter
 dump_modify dump_co sort id
 dump dump_topo particles local 1 ${fname_write_dump_topo} c_final_geometry[*] c_final_topology[*]
@@ -159,7 +159,7 @@ label labelcycleloop
       
       # Temperature variation ramp
       if "!${FIXED}" then "include in.START_BC_control_3 # Start boundary controller only if simulation not in fixed box"
-      thermo_style custom step v_DTcurrent v_epsv v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz
+      thermo_style custom step v_DTcurrent v_epsv v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz
       variable DTstart equal ${DTcurrent}
       variable DTstop equal $(v_DTstart+v_DTramp)
       variable DTcurrent equal ramp(${DTstart},${DTstop})
@@ -173,7 +173,7 @@ label labelcycleloop
       if "!${FIXED}" then "include in.START_BC_control_3 # Start boundary controller only if simulation not in fixed box"
       include in.PRESET_equilibrium_all_3 # Sets equilibrium conditions on all variables
       include in.START_equilibrium_3
-      thermo_style custom step v_convke v_convufr v_convfres v_convtqres v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz v_lx v_ly v_lz xy xz yz v_pf
+      thermo_style custom step v_convke v_convufr v_convfres v_convtqres v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_pf
       thermo ${Nthermo}
       run ${Nmax} # Will be stopped at equilibrium
       if "!${FIXED}" then "include in.STOP_BC_control_3 # Stop boundary controller only if simulation not in fixed box"
@@ -185,7 +185,7 @@ label labelcycleloop
       variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
       
       write_restart ${fname_write_restart} # Save current state
-      thermo_style custom step v_DTcurrent v_epsv v_pf v_pxx v_pyy v_pzz v_pxy v_pxz v_pyz # 10 entries
+      thermo_style custom step v_DTcurrent v_epsx v_epsy v_epsz v_epsv v_pf v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz # 15 entries
       dump dump_co particles custom 1 ${fname_write_dump_co} id x y z radius diameter
       dump_modify dump_co sort id
       dump dump_topo particles local 1 ${fname_write_dump_topo} c_final_geometry[*] c_final_topology[*]
