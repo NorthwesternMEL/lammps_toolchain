@@ -155,11 +155,12 @@ var_param_equilibrium_3+=(1e-4) # Tolerance on stress: `tolp0`
 # == Variables for input parameters of `in.DEF_param_sample_preparation_3` == #
 var_param_sample_preparation_3=() 
 # Sample size
-var_param_sample_preparation_3+=(8e3) # Number of particles: `Ntarget`
+var_param_sample_preparation_3+=(8e3) # Number of particles: `Nparticles`
 var_param_sample_preparation_3+=(1) # Aspect ratio of the sample Lz/Lx or Lz/Ly: `aspectratio`
 var_param_sample_preparation_3+=(1.5) # Additional padding of walls from periodic cell boundary: `wallpad`
 # Random generation
 var_param_sample_preparation_3+=(true) # Flag for PSD read from file: `READPSD`
+var_param_sample_preparation_3+=(7864) # Random integer seed for filling of lattice sites: `latseed`
 var_param_sample_preparation_3+=(5019) # Random integer seed for uniform particle diameter: `dseed`
 var_param_sample_preparation_3+=(7864) # Random integer seed for orientation of clumps upon lattice deposition: `orientseed`
 # Mixing
@@ -259,7 +260,7 @@ fi
 # =========================================================================== #
 
 
-# source script_sample_preparation_3
+ source script_sample_preparation_3
 # wait
 
 # You can change some of the parameters values between the simulations
@@ -274,7 +275,7 @@ fi
 
 # You can change some of the parameters values between the simulations
 
-source script_test_oedo_3
+#source script_test_oedo_3
 # wait
 
 # You can change some of the parameters values between the simulations

@@ -35,9 +35,8 @@ include in.DEF_init_post_3
 
 # ---- DETERMINATION OF THE NUMBER OF PARTICLES ON INITIAL LATTICE ---- #
 #
-variable Nx equal $(round((v_Ntarget/v_aspectratio)^(1/3))) # Number of particles in horizontal directions X and Y
+variable Nx equal $(round((1.5*v_Nparticles/v_aspectratio)^(1/3))) # Number of particles in horizontal directions X and Y (Augmented by 50% to partially fill the lattice randomly with Nparticles)
 variable Nz equal $(v_aspectratio*v_Nx) # Number of particles in vertical direction Z
-variable Nparticles equal "v_Nx*v_Nx*v_Nz" # Number of clumps in the simulation
 
 # ---- DEFINITION OF THE ORTHOGONAL CELL ---- #
 #
@@ -62,10 +61,10 @@ pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL $
 #
 
 lattice sc $(v_spacing*v_dmax) # Definition of the deposition lattice
-if "${SPHERE}" then "create_atoms 1 region insert # Create real particles on a cubic lattice in the insertion region" &
+if "${SPHERE}" then "create_atoms 1 region insert subset ${Nparticles} ${latseed} # Create real particles on a cubic lattice in the insertion region with density pflat" &
 elif "!${SPHERE}" &
 "molecule mol_poly_clump ${clump_filename} scale ${dmax} # All particles are initially inserted at size dmax to avoid wrapping around PBCs" &
-"create_atoms 0 region insert mol mol_poly_clump ${orientseed} # Create real particles on a cubic lattice in the insertion region" &
+"create_atoms 0 region insert mol mol_poly_clump ${orientseed} subset ${Nparticles} ${latseed} # Create real particles on a cubic lattice in the insertion region with density pflat" &
 else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
 
 create_atoms 2 single $(0.5*(xhi+xlo)) $(0.5*(yhi+ylo)) $(0.5*(zhi+zlo)) units box # Create dummy particle for volumetric control of boundaries

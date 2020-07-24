@@ -18,7 +18,7 @@
 # ---- SAMPLE PREPARATION PARAMETERS ---- #
 
 # Sample size
-variable Ntarget equal ${var_param_sample_preparation_3} # Target number of particles in the system
+variable Nparticles equal ${var_param_sample_preparation_3} # Number of particles in the system
 next var_param_sample_preparation_3
 variable aspectratio equal ${var_param_sample_preparation_3} # Aspect ratio of the simulation box: aspectratio = Z_dimension/X.Y_dimension
 next var_param_sample_preparation_3
@@ -27,6 +27,8 @@ next var_param_sample_preparation_3
 
 # Random generation
 variable READPSD equal ${var_param_sample_preparation_3} # Defines is PSD read from file (true) or created uniformly by LAMMPS (false)
+next var_param_sample_preparation_3
+variable latseed equal ${var_param_sample_preparation_3} # Random integer seed for filling of lattice sites randomly
 next var_param_sample_preparation_3
 variable dseed equal ${var_param_sample_preparation_3} # Random integer seed for uniform particle diameter
 next var_param_sample_preparation_3
