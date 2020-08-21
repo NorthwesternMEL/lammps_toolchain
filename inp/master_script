@@ -54,7 +54,7 @@
 path_in="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp"
 
 # Path to the folder where output files (dump,restart,data,log,wall) are saved
-path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\oedo_test" # `pathstr`
+path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir" # `pathstr`
 
 # Suffix appended to output files (dump,restart,data,log,wall): no white space!
 fname_suffix="" # If no suffix, use empty string ""
@@ -220,7 +220,7 @@ var_param_heat_cool_3+=(true) # Initial compression isotropic (true) or oedometr
 var_param_heat_cool_3+=(1e3) # Initial pressure level for heating-cooling cycles [Pa]: `Pheat_cool`
 var_param_heat_cool_3+=(1e-4) # Inertial number for initial compression: `In0_compression`
 # Heating - Cooling cycles
-var_param_heat_cool_3+=(1) # Number of cycles: `Ncycle`
+var_param_heat_cool_3+=(2) # Number of cycles: `Ncycle`
 var_param_heat_cool_3+=(true) # Cycle starts with heating: `HEATING_FIRST`
 var_param_heat_cool_3+=(false) # Boundaries are fixed: `FIXED`
 var_param_heat_cool_3+=(false) # Heating/Cooling under isotropic (true) or oedometric (false) stress-control: `HEATCOOL_ISO`
@@ -234,7 +234,8 @@ var_param_heat_cool_3+=(0.0) # Cumulative temperature variation at beginning of 
 var_param_heat_cool_3+=(25000) # Number of timesteps for heating by `DTsetp` °C: `Nrun_heat`
 var_param_heat_cool_3+=(25000) # Number of timesteps for cooling by `DTsetp` °C: `Nrun_cool`
 var_param_heat_cool_3+=(1) # Frequency of temeprature change, in timesteps: `Nevery_heat_cool`
-
+var_param_heat_cool_3+=(false) # Save output after heating (true or false): `SAVE_HEATING`
+var_param_heat_cool_3+=(true) # Save output after cooling (true or false): `SAVE_COOLING`
 
 
 # =========================================================================== #
@@ -260,7 +261,7 @@ fi
 # =========================================================================== #
 
 
- source script_sample_preparation_3
+# source script_sample_preparation_3
 # wait
 
 # You can change some of the parameters values between the simulations
@@ -280,7 +281,7 @@ fi
 
 # You can change some of the parameters values between the simulations
 
-# source script_heat_cool_3
+ source script_heat_cool_3
 # wait
 
 

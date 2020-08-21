@@ -139,14 +139,14 @@ label labelcycleloop
     "variable heat_cool_str string heating # For output files naming" &
     "variable Nrun equal ${Nrun_heat}" &
     "variable DTramp equal ${DTstep}" &
-    "print '					HEATING'" &
+    "print '					HEATING, cycle $(v_cycleloop)'" &
     elif "(!${HEATING_FIRST} && ${phaseloop}==1) || (${HEATING_FIRST} && ${phaseloop}==2)" &
     "variable HEATING equal false # Cooling -> decrease particles dimensions" &
     "variable In0 equal ${In0_cool} # Overwrite the inertial number for cooling phase" &
     "variable heat_cool_str string cooling # For output files naming" &
     "variable DTramp equal -${DTstep}" &
     "variable Nrun equal ${Nrun_cool}" &
-    "print '					COOLING'" &
+    "print '					COOLING, cycle $(v_cycleloop)'" &
     else "print 'Script Error: flag HEATING_FIRST should have value true or false and was given $(v_HEATING_FIRST)'" "quit"
     
     variable steploop loop $(floor(v_DTtarget/v_DTstep+0.5)) # Heating/Cooling in steps of DTstep: ramp + equilibrium
@@ -180,20 +180,20 @@ label labelcycleloop
       include in.STOP_equilibrium_3
       
       # Save equilibrium state at the end of the step
-      variable fname_write_restart string "${quote}${pathstr}/restart.after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}${quote}" # Name of restart file written with absolute path
-      variable fname_write_dump_co string "${quote}${pathstr}/dump.co_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
-      variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
-      
-      write_restart ${fname_write_restart} # Save current state
-      thermo_style custom step v_DTcurrent v_epsx v_epsy v_epsz v_epsv v_pf v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz # 15 entries
-      dump dump_co particles custom 1 ${fname_write_dump_co} id x y z radius diameter
-      dump_modify dump_co sort id
-      dump dump_topo particles local 1 ${fname_write_dump_topo} c_final_geometry[*] c_final_topology[*]
-      log ${fname_write_log_eq} append
-      run 0 # To save state in log file for post-processing
-      log ${fname_write_log} append
-      undump dump_co
-      undump dump_topo
+      if "(${HEATING} && ${SAVE_HEATING}) || (!${HEATING} && ${SAVE_COOLING})" then &
+      "variable fname_write_restart string '${quote}${pathstr}/restart.after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}${quote}' # Name of restart file written with absolute path" &
+      "variable fname_write_dump_co string '${quote}${pathstr}/dump.co_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj${quote}' # Name of coordinates dump file written with absolute path" &
+      "variable fname_write_dump_topo string '${quote}${pathstr}/dump.topo_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj${quote}' # Name of coordinates dump file written with absolute path" &
+      "write_restart ${fname_write_restart} # Save current state" &
+      "thermo_style custom step v_DTcurrent v_epsx v_epsy v_epsz v_epsv v_pf v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz # 15 entries" &
+      "dump dump_co particles custom 1 ${fname_write_dump_co} id x y z diameter" &
+      "dump_modify dump_co sort id" &
+      "dump dump_topo particles local 1 ${fname_write_dump_topo} c_final_geometry[*] c_final_topology[*]" &
+      "log ${fname_write_log_eq} append" &
+      "run 0 # To save state in log file for post-processing" &
+      "log ${fname_write_log} append" &
+      "undump dump_co" &
+      "undump dump_topo"
       
     next steploop
     jump SELF labelsteploop

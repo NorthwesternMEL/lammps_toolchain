@@ -33,7 +33,7 @@ It is recommended to use the following (out of habit):
     - press,qdev: mean stress and deviatoric stress ( q = sqrt(3*J_2) )
 
 TODO:
-    - 
+    - Perform the calculations for when walls are present (changes the rattlers)
 """
 
 #from dump import dump # The folder of pizza.py sources must be in the pythonpath
@@ -374,6 +374,202 @@ def stiffness_tensor(dmptopo,dmpco,E,nu):
         
     #return {'Voigt':Voigt} We could use this to return different tensors, each with their own components
     return Voigt
+
+# --------------------------------------------------------------------------- #
+
+def thermal_conductivity(dmptopo,dmpco,ks,kf,E,nu):
+    """
+    Computes the thermal conductivity of the system using approach of
+    Vargas and McCarthy (2002), https://doi.org/10.1016/S0017-9310(02)00175-8
+
+    the dumps must be saved at matching timesteps
+    todo:
+        - check for id1 id2
+        - propose switch for cases with walls, and cases with PBC.
+    INPUT:
+    dmptopo: Dump of the contacts topology [dump class from Pizza]
+    dmpco: Ordered dump of the particles coordinates [dump class from Pizza]
+    ks: Thermal conductivity of the constituting material of the solid particles [W/m/K]
+    kf: Thermal conductivity of the stangnant interstitial fluid [W/m/K]
+    E: Young's modulus of the constituting material of the solid particles [Pa]
+    nu: Poisson's ratio of the constituting material of the solid particles [-]
+
+
+    OUTPUT:
+    xx,yy,zz,xy,xz,yz (th_conductivity[i,j]): components of the thermal conductivity tensor
+    """
+
+    Nsnaps = dmpco.nsnaps # Number of snapshot in the dump `dmpco`
+    if Nsnaps != dmptopo.nsnaps:
+        raise ValueError("The coordinates and topology dumps must have the same number of snapshots")
+
+    flag_radius=flag_diameter=False # If diameter or radius is read
+    if 'diameter' in dmpco.names.keys():
+        flag_diameter=True
+    elif 'radius' in dmpco.names.keys():
+        flag_radius=True
+    else:
+        raise KeyError("The coordinates dump file and dictionary must define the 'radius' or 'diameter' keys")
+
+    flag_fn=flag_dist=False # If fn ordist is read
+    if 'fn' in dmptopo.names.keys():
+        flag_fn=True
+    elif 'dist' in dmptopo.names.keys():
+        flag_dist=True
+    else:
+        raise KeyError("The dump file and dictionary lack keys to determine contact conductance")
+
+    if not all(branch in dmptopo.names.keys() for branch in ['lx','ly','lz']):
+        raise KeyError("The dump file and dictionary must define all branch vector keys 'lx', 'ly' and 'lz'")
+
+    gradTs = [{'x':1,'y':0,'z':0},
+              {'x':0,'y':1,'z':0},
+              {'x':0,'y':0,'z':1}]# Macroscopic gradient of temperature
+
+    th_conductivity = np.zeros((Nsnaps,6)) # Thermal conductivity tensor
+
+    for t in range(Nsnaps):
+        if dmpco.snaps[t].time != dmptopo.snaps[t].time:
+            raise ValueError("The coordinates and topology dumps must have matching snapshots")
+        pair = np.asarray(dmptopo.snaps[t].atoms[:,[dmptopo.names['id1'],dmptopo.names['id2']]],dtype=int) # Pairs within max cutoff
+        touchflag = touch(dmptopo,t)[0] # Get particles actually touching
+        backboneflag = backbone(pair[touchflag])[0] # Determination the backbone pairs among the contacts
+        pair = pair[touchflag][backboneflag] # Pair in the backbone
+
+        # Effective radius
+        if flag_diameter:
+            rad = 0.5*dmpco.snaps[t].atoms[:,dmpco.names['diameter']]
+        elif flag_radius:
+            rad = dmpco.snaps[t].atoms[:,dmpco.names['radius']]
+        Reff = rad[pair[:,dmptopo.names['id1']]-1]*rad[pair[:,dmptopo.names['id2']]-1]/(rad[pair[:,dmptopo.names['id1']]-1]+rad[pair[:,dmptopo.names['id2']]-1])
+        # particle overlap
+        if flag_fn:
+            fn = dmptopo.snaps[t].atoms[:,dmptopo.names['fn']][touchflag][backboneflag] # Normal force between particles
+            delta = (1.5*fn/(E*np.sqrt(Reff)/(1.0-nu**2)))**(2.0/3.0) # positive overlap between particles in contact
+        elif flag_dist:
+            dist = dmptopo.snaps[t].atoms[:,dmptopo.names['dist']][touchflag][backboneflag] # distance between particles in contact, to normalize branch vector
+            delta = rad[pair[:,dmptopo.names['id1']]-1]+rad[pair[:,dmptopo.names['id2']]-1] - dist # positive overlap between particles in contact
+        # Overlap can be zero due to precision
+        # We flag and make conductance negligible in that case
+        delta[delta<=0.0] = 0.0
+        # Contact radius
+        a = np.sqrt(Reff*delta)
+        # Contact conductance
+        h_s = 2*ks*a
+        h_f = kf*(2.0*np.pi*(1.0-0.5*(a/(2*Reff))**2)*(2*Reff-a))/(1.0-0.25*np.pi)
+        h = h_s + h_f
+        h[delta==0.0] = 1e-3*np.min(h) # These pairs are nearly not touching, make conductance negligible
+
+        # Renumbering for compact backbone matrix
+        id_atom, idx = np.unique(pair,return_inverse=True)
+
+        # linear system K*T = Q to solve
+        # Conductance matrix K, sparse, could be optimized
+        K = np.zeros((len(id_atom),len(id_atom)))
+        for i in range(len(h)):
+            # Must be in a loop otherwise it does not add up terms that come multiple times
+            # eg array[[0,0]] += [1,2] is equal to array[[0,0]]+2, not array[[0,0]]+3
+            K[(idx[::2][i]),(idx[1::2][i])] = K[(idx[::2][i]),(idx[1::2][i])] - h[i]
+            K[(idx[1::2][i]),(idx[::2][i])] = K[(idx[1::2][i]),(idx[::2][i])] - h[i]
+            K[(idx[::2][i]),(idx[::2][i])] = K[(idx[::2][i]),(idx[::2][i])] + h[i]
+            K[(idx[1::2][i]),(idx[1::2][i])] = K[(idx[1::2][i]),(idx[1::2][i])] + h[i]
+
+        # Flux vector Q
+        Q = np.zeros((len(id_atom),len(gradTs)))
+        # For walls, create new contacts with walls
+        # with walls, we must add new term to K conductance matrix.
+        # THIS IS CURRENTLY NOT IMPLEMENTED
+
+        # For PBC, identify pairs that cross PBC
+        Lx = dmpco.snaps[t].xhi - dmpco.snaps[t].xlo # X-dimension of the periodic cell
+        Ly = dmpco.snaps[t].yhi - dmpco.snaps[t].ylo # Y-dimension of the periodic cell
+        Lz = dmpco.snaps[t].zhi - dmpco.snaps[t].zlo # Z_dimension of the periodic cell
+        xpair = dmpco.snaps[t].atoms[pair-1,dmpco.names['x']] # X position of atoms in pair
+        ypair = dmpco.snaps[t].atoms[pair-1,dmpco.names['y']] # Y position of atoms in pair
+        zpair = dmpco.snaps[t].atoms[pair-1,dmpco.names['z']] # Z position of atoms in pair
+        lxpair = dmptopo.snaps[t].atoms[:,dmptopo.names['lx']][touchflag][backboneflag]
+        lypair = dmptopo.snaps[t].atoms[:,dmptopo.names['ly']][touchflag][backboneflag]
+        lzpair = dmptopo.snaps[t].atoms[:,dmptopo.names['lz']][touchflag][backboneflag]
+        if not flag_dist:
+            dist = np.sqrt(lxpair**2 + lypair**2 + lzpair**2)
+        idx_cross_x = (xpair[:,0]-xpair[:,1])/lxpair<0 # negative sign shows pairs that cross PBC
+        idx_cross_y = (ypair[:,0]-ypair[:,1])/lypair<0
+        idx_cross_z = (zpair[:,0]-zpair[:,1])/lzpair<0
+        # First boundary being crossed, for average flow calculation
+        t_cross_x = (-np.abs(0.5*(dmpco.snaps[t].xlo + dmpco.snaps[t].xhi)-xpair[:,1])+0.5*Lx)/np.abs(lxpair) # distance ratio between particle j and boundary and branch vector size 
+        t_cross_y = (-np.abs(0.5*(dmpco.snaps[t].ylo + dmpco.snaps[t].yhi)-ypair[:,1])+0.5*Ly)/np.abs(lypair)
+        t_cross_z = (-np.abs(0.5*(dmpco.snaps[t].zlo + dmpco.snaps[t].zhi)-zpair[:,1])+0.5*Lz)/np.abs(lzpair)
+        first_cross = np.zeros(len(h)) # first boundary crossed by pair: 0=none, 1=x, 2=y, 3=z
+        for i in range(len(h)):
+            min_t = float('inf')
+            if idx_cross_x[i] == True and t_cross_x[i] < min_t:
+                # PBC x crossed first so far
+                first_cross[i] = 1
+                min_t = t_cross_x[i]
+            if idx_cross_y[i] == True and t_cross_y[i] < min_t:
+                # PBC y crossed first so far
+                first_cross[i] = 2
+                min_t = t_cross_y[i]
+            if idx_cross_z[i] == True and t_cross_z[i] < min_t:
+                # PBC z crossed first so far
+                first_cross[i] = 3
+                min_t = t_cross_z[i]
+
+        for i in range(len(gradTs)):
+            for j in range(len(h)):
+                # Must be in a loop otherwise it does not add up terms that come multiple times
+                # eg array[[0,0]] += [1,2] is equal to array[[0,0]]+2, not array[[0,0]]+3
+                Q[idx[::2][j],i] = Q[idx[::2][j],i] + h[j]*(
+                        Lx*gradTs[i]['x']*np.sign(-lxpair[j]*gradTs[i]['x'])*idx_cross_x[j] +
+                        Ly*gradTs[i]['y']*np.sign(-lypair[j]*gradTs[i]['y'])*idx_cross_y[j] +
+                        Lz*gradTs[i]['z']*np.sign(-lzpair[j]*gradTs[i]['z'])*idx_cross_z[j])
+                Q[idx[1::2][j],i] = Q[idx[1::2][j],i] + h[j]*(
+                        Lx*gradTs[i]['x']*np.sign(lxpair[j]*gradTs[i]['x'])*idx_cross_x[j] +
+                        Ly*gradTs[i]['y']*np.sign(lypair[j]*gradTs[i]['y'])*idx_cross_y[j] +
+                        Lz*gradTs[i]['z']*np.sign(lzpair[j]*gradTs[i]['z'])*idx_cross_z[j])
+
+        # Temperature of one particle must be fixed in PBC (K matrix is singular)
+        # otherwise, infinite solutions to within a constant temperature
+        # see [Marzougui et al., 2013. Particles. Numerical simulations of dense suspensions rheology using a DEM-fluid coupled model]
+        # By default, temperature of first particle is directly set to zero (no Lagrange Multipliers)
+        # Delte 1st row and 1st column of K matrix, delete 1st entry of Q vector
+        K = K[1:,1:]
+        Q = Q[1:,:]
+        temp = LA.solve(K,Q)
+        temp = np.insert(temp,0,0,axis=0) # re-introduce the zero value for the temperature of the first particle
+
+        # Compute average heat flow from temerature
+        q_avg = np.zeros(3*len(gradTs))
+
+        for i in range(len(gradTs)):
+            # Shifted temperature based on all boundaries crossed
+            delta_temp_shift = temp[idx[1::2],i] - temp[idx[::2],i] -\
+                           Lx*gradTs[i]['x']*np.sign(lxpair*gradTs[i]['x'])*idx_cross_x -\
+                           Ly*gradTs[i]['y']*np.sign(lypair*gradTs[i]['y'])*idx_cross_y -\
+                           Lz*gradTs[i]['z']*np.sign(lzpair*gradTs[i]['z'])*idx_cross_z
+            # Average flux based on first boundary crossed
+            q_avg[3*i+0] = np.sum(h*delta_temp_shift*lxpair/dist*Lx*(first_cross==1)) # Average flux accross xlo and xhi boundary
+            q_avg[3*i+1] = np.sum(h*delta_temp_shift*lypair/dist*Ly*(first_cross==2)) # Average flux accross ylo and yhi boundary
+            q_avg[3*i+2] = np.sum(h*delta_temp_shift*lzpair/dist*Lz*(first_cross==3)) # Average flux accross zlo and zhi boundary
+        q_avg /= Lx*Ly*Lz
+
+        # Determine thermal conductivity tensor
+        # Define temperature gradient matrix that enforces symmetry
+        # Effective thermal conductivity tensor by least squares usign multiple temperature gradients
+        gradT_mat = np.zeros((3*len(gradTs),6))
+        for i in range(len(gradTs)):
+            gradT_mat[3*i+0,[0,1,2]] = [gradTs[i]['x'],gradTs[i]['y'],gradTs[i]['z']]
+            gradT_mat[3*i+1,[1,3,4]] = [gradTs[i]['x'],gradTs[i]['y'],gradTs[i]['z']]
+            gradT_mat[3*i+2,[2,4,5]] = [gradTs[i]['x'],gradTs[i]['y'],gradTs[i]['z']]
+
+        th_conductivity[t] = LA.lstsq(gradT_mat,-q_avg,rcond=None)[0] # Least square solving q = -k gradT
+
+    return {'xx': th_conductivity[:,0],
+            'xy': th_conductivity[:,1],
+            'xz': th_conductivity[:,2],
+            'yy': th_conductivity[:,3],
+            'yz': th_conductivity[:,4],
+            'zz': th_conductivity[:,5]}
 
 # --------------------------------------------------------------------------- #
 

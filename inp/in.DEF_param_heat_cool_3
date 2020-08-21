@@ -55,6 +55,10 @@ next var_param_heat_cool_3
 variable Nrun_cool equal ${var_param_heat_cool_3} # Number of timestep during which the geometry is changed due to cooling
 next var_param_heat_cool_3
 variable Nevery_heat_cool equal ${var_param_heat_cool_3} # Frequency of geometry change during heating/cooling
+next var_param_heat_cool_3
+variable SAVE_HEATING equal ${var_param_heat_cool_3} # Save restart/dump after heating (to save memory)
+next var_param_heat_cool_3
+variable SAVE_COOLING equal ${var_param_heat_cool_3} # Save restart/dump after cooling (to save memory)
 # NEVER call `next` on the variable at the end of the definitions.
 # This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !
 
