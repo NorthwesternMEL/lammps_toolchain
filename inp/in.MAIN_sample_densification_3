@@ -51,7 +51,7 @@ include in.SET_conv_3
 # ---- MATERIAL AND CONTACT LAW ---- #
 
 pair_style	granular
-pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} $(v_f*v_friction_reduction) # Contact law with reduced friction for densification (Salot et al., 2009)
+pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} $(v_f*v_friction_reduction) # Contact law with reduced friction for densification (Salot et al., 2009)
 
 
 #####################################
@@ -92,7 +92,7 @@ if "${BREAKCONTACT}" then &
 "run 0 # To allow change box (verify at the run that all pressures are equal to zero i.e. no contact between particles)" &
 "change_box all x scale $(1+v_contact_expansion) y scale $(1+v_contact_expansion) z scale $(1+v_contact_expansion) remap # Expansion to make sure there is no contact left" &
 "## SMALL VIBRATION TO SLIGHTLY SHIFT CONTACTS AND BREAK DENSITY - COORDINATION CORRELATION" &
-"pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} 0.0 # Contact law with no friction for shaking phase (Agnolin & Roux 2007)" &
+"pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} 0.0 # Contact law with no friction for shaking phase (Agnolin & Roux 2007)" &
 "variable mixtemp equal $(v_msys*(v_mixintensity*v_dsys/v_tsyshertz_kn)^2/(3*1.380e-23)) # Equivalent temperature for average mixing velocity based on gas kinetic theory T=mv^2/3kb (Boltzmann constant kb=1.380e-23)" &
 "velocity particles create ${mixtemp} ${mixseed} temp temp_sphere" &
 "run 0" &
@@ -106,7 +106,7 @@ if "${BREAKCONTACT}" then &
 
 ## FINAL COMPRESSION
 
-pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} $f # Contact law with true friction for finale assembly at the given porosity (Agnolin & Roux 2007)
+pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} $f # Contact law with true friction for finale assembly at the given porosity (Agnolin & Roux 2007)
 
 variable In0 equal ${In0_equilibrium} # Overwrite the inertial number to small value for equilibration
 variable REMAP equal $(v_remap_save) # Retrieve remapping value passed to script

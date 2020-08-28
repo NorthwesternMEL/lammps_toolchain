@@ -12,7 +12,6 @@
 # TODO:
 # - THE REACHING TARGET PERSSURE PART OF THAT FILE WILL BE SHARED WITH ALL MAIN FILES THAT ARE NOT THE INITIAL ASSEMBLY, SHOULD WE GENERALIZE IT AND EXTERNALIZE IT ?
 # - NEED SOMETHING SAFER FOR THE WALLS, not sure what I meant by that when I wrote it
-# - figure out mindlin_rescale
 # - We might think of distinc temperature amplitudes in the future, i.e. progressive heating, progressive cooling
 
 ####################
@@ -52,7 +51,7 @@ include in.SET_conv_3
 # ---- MATERIAL AND CONTACT LAW ---- #
 
 pair_style	granular
-pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} $f # Contact law with friction
+pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} $f # Contact law with friction
 
 # ---- DAMPING ---- #
 

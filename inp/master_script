@@ -261,7 +261,7 @@ fi
 # =========================================================================== #
 
 
-# source script_sample_preparation_3
+ source script_sample_preparation_3
 # wait
 
 # You can change some of the parameters values between the simulations
@@ -281,7 +281,7 @@ fi
 
 # You can change some of the parameters values between the simulations
 
- source script_heat_cool_3
+# source script_heat_cool_3
 # wait
 
 

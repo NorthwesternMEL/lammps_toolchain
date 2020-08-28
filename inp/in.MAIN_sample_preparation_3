@@ -55,7 +55,7 @@ create_box 3 box # General number of atom types: 1=real atoms and center of clum
 # ---- MATERIAL AND CONTACT LAW ---- #
 #
 pair_style	granular
-pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} 0.0 # Frictionless for initial preparation
+pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} 0.0 # Frictionless for initial preparation
 
 # ---- CREATION OF THE PARTICLES AND DUMMY PARTICLES FOR BOUNDARY CONTROL ---- #
 #
@@ -202,7 +202,7 @@ run ${Nthermo} # Use a to be / newly defined Nshort? Visual verification in ther
 # ---- ISOTROPIC COMPRESSION TO THE TARGET PRESSURE ---- #
 ##########################################################
 
-pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} $f # Contact law with friction for final assembly
+pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} $f # Contact law with friction for final assembly
 
 ## First run, equilibrate pressure
 

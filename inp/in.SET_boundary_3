@@ -14,7 +14,6 @@
 #
 # TODO:
 # - possibility to have only one wall to move in each direction, vs symmetric motion of both walls?
-# - figure out mindlin rescale after it is debugged in LAMMPS
 
 
 # ---- DETERMINES IF SIMULATION WITH WALLS OR PBC ---- #
@@ -81,12 +80,12 @@ if "${SET_FLAG_WALL}" then &
 "region wyhi plane $(0.5*(xlo+xhi)) ${yhi_0_BC} $(0.5*(zlo+zhi)) 0 -1 0 move NULL v_dyhi_BC NULL units box # Wall on yhi side" &
 "region wzlo plane $(0.5*(xlo+xhi)) $(0.5*(ylo+yhi)) ${zlo_0_BC} 0 0 1 move NULL NULL v_dzlo_BC units box # Wall on zlo side" &
 "region wzhi plane $(0.5*(xlo+xhi)) $(0.5*(ylo+yhi)) ${zhi_0_BC} 0 0 -1 move NULL NULL v_dzhi_BC units box # Wall on zlo side" &
-"fix wxlo particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wxlo # frictionless xlo wall" &
-"fix wxhi particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wxhi # frictionless xlo wall" &
-"fix wylo particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wylo # frictionless ylo wall" &
-"fix wyhi particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wyhi # frictionless ylo wall" &
-"fix wzlo particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wzlo # frictionless zlo wall" &
-"fix wzhi particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale NULL ${tcdr} ${fwall} region wzhi # frictionless zlo wall" &
+"fix wxlo particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} ${fwall} region wxlo # frictionless xlo wall" &
+"fix wxhi particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} ${fwall} region wxhi # frictionless xlo wall" &
+"fix wylo particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} ${fwall} region wylo # frictionless ylo wall" &
+"fix wyhi particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} ${fwall} region wyhi # frictionless ylo wall" &
+"fix wzlo particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} ${fwall} region wzlo # frictionless zlo wall" &
+"fix wzhi particles wall/gran/region granular hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} ${fwall} region wzhi # frictionless zlo wall" &
 "variable lx equal 'v_xhi_BC - v_xlo_BC'" &
 "variable ly equal 'v_yhi_BC - v_ylo_BC'" &
 "variable lz equal 'v_zhi_BC - v_zlo_BC'" &
