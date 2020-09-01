@@ -25,7 +25,7 @@ variable In0_compression equal ${var_param_heat_cool_3} # Inertial number for th
 next var_param_heat_cool_3
 
 # Heating - Cooling cycles
-variable Ncycle equal ${var_param_heat_cool_3} # Number of heating - cooling cycles
+variable Ncycle equal ${var_param_heat_cool_3} # Number of heating - cooling cycles, if zero: only monotonic heating or cooling
 next var_param_heat_cool_3
 variable HEATING_FIRST equal ${var_param_heat_cool_3} # Flag that determines if heating (true) or cooling (false) first
 next var_param_heat_cool_3

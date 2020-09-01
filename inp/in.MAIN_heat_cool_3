@@ -126,6 +126,11 @@ undump dump_topo
 
 print "                                               WARNING: THE VALUES OF Nrun AND Ndump ARE OVERWRITTEN"
 
+## Degenerate case of heating or cooling only, i.e. no cycle, when Ncycle = 0
+if "${Ncycle}==0" then &
+"variable cycleloop equal 0" &
+"jump SELF labelcycleloop"
+
 variable cycleloop loop ${Ncycle} # Ncycle cycles of heating and cooling
 label labelcycleloop
 
@@ -197,6 +202,11 @@ label labelcycleloop
     next steploop
     jump SELF labelsteploop
     
+    ## Degenerate case of heating or cooling only, i.e. no cycle, when Ncycle = 0
+    if "${Ncycle}==0" then &
+    "print 'DEGENERATE SIMULATION, MONOTONIC HEATING/COOLING ONLY: END OF SIMULATION'" &
+    "quit"
+
   next phaseloop
   jump SELF labelphaseloop
   
