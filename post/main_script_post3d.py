@@ -248,7 +248,7 @@ post3d.map_dic(dmp,dic)
 dens = post3d.density(dmp)
 Npart = dmp.snaps[0].natoms # Number of particles
 
-output_fname = ["sample_geom.csv"] # Must be a list for output_csv() to work
+output_fnames = ["sample_geom.csv"] # Must be a list for output_csv() to work
 output_values = np.transpose(dens.values())
 output_header = dens.keys()
 output_style = 'single'
@@ -297,7 +297,7 @@ with cd(input_path):
     input_fnames.insert(0,glob.glob("dump.topo_sample_before_cycles*")[0]) # initial state before cycles
     # No need to sort, dump() sorts snapshots automatically
 
-dic = {"id1":1, "id2":2, "dist":3, "lx":4, "ly":5, "lz":6}
+dic = {"id1":1, "id2":2, "fn":3, "ft":4, "lx":5, "ly":6, "lz":7}
 with cd(input_path):
     dmp = dump(" ".join(input_fnames)) # Reading of all the selected dump files
 post3d.map_dic(dmp,dic)

@@ -593,6 +593,7 @@ def force_distribution(dmptopo,Nsample,fn_range,mob_range,mu):
     fn_mean: mean normal force of all backbone contacts, one per snapshot
     fn_cumul: cumulative probability of normal force at the Nsample values of fn_val, one per snapshot
     fn_density: probability density function of normal force at the Nsample values of fn_val, one per snapshot
+    mob_mean: mean mobilized friction of all backbone contacts, one per snapshot
     mob_bins: Nsample+1 values of the bin edges of normal force (normalized by mean value), common to all snapshots, center of bins (if key 'ft' is defined, otherwise returns None)
     mob_cumul: cumulative probability of mobilized friction (if key 'ft' is defined, otherwise returns None)
     mob_density: probability density function of mobilized friction (if key 'ft' is defined, otherwise returns None)
@@ -614,6 +615,7 @@ def force_distribution(dmptopo,Nsample,fn_range,mob_range,mu):
     fn_cumul = np.zeros((Nsnaps,Nsample+1)) # cumulative distribution of normal forces
     fn_density = np.empty((Nsnaps,Nsample)) # probability density function of normal forces
     
+    mob_mean = np.empty(Nsnaps) # mean mobilized friction
     mob_cumul = np.empty((Nsnaps,Nsample+1)) # cumulative distribution of normal forces
     mob_density = np.empty((Nsnaps,Nsample)) # probability density function of normal forces
     
@@ -650,6 +652,7 @@ def force_distribution(dmptopo,Nsample,fn_range,mob_range,mu):
         if flag_ft:
             ft = dmptopo.snaps[t].atoms[:,dmptopo.names['ft']][touchflag][backboneflag] # Tangent force between particles of the backbone
             mob = np.minimum(np.maximum(ft/(fn*mu),0.0),1.0) # mobilized friction between particles of the backbone
+            mob_mean[t] = np.mean(mob) # Mean value of the mobilized friction  between backbone particles
             mob_density[t] = np.histogram(mob, bins=mob_bins, density=True)[0] *(mob_range[1]-mob_range[0]) # Probability density function of mobilized friction in given range. Maximum range expected to be [0,1]
             mob_cumul[t,1:] = np.cumsum(mob_density[t]) * (mob_bins[1]-mob_bins[0]) # Cumulative distribution function of mobilized friction in given range
             mob_cumul[t] += float(np.count_nonzero(mob < mob_range[0]))/len(mob) # Cumulative distribution function of mobilized friction in given range
@@ -658,6 +661,7 @@ def force_distribution(dmptopo,Nsample,fn_range,mob_range,mu):
             'fn_mean': fn_mean,
             'fn_cumul': fn_cumul,
             'fn_density': fn_density,
+            'mob_mean': mob_mean,
             'mob_bins': mob_bins,
             'mob_cumul': mob_cumul,
             'mob_density':mob_density}

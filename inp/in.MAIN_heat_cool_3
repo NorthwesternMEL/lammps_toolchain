@@ -163,7 +163,7 @@ label labelcycleloop
       
       # Temperature variation ramp
       if "!${FIXED}" then "include in.START_BC_control_3 # Start boundary controller only if simulation not in fixed box"
-      thermo_style custom step v_DTcurrent v_epsv v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz
+      thermo_style custom step v_DTcurrent v_epsv v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_convke v_convufr v_convfres v_convtqres
       variable DTstart equal ${DTcurrent}
       variable DTstop equal $(v_DTstart+v_DTramp)
       variable DTcurrent equal ramp(${DTstart},${DTstop})
