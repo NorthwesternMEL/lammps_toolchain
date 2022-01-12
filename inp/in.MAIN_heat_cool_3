@@ -188,7 +188,6 @@ label labelcycleloop
       "variable fname_write_restart string '${quote}${pathstr}/restart.after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}${quote}' # Name of restart file written with absolute path" &
       "variable fname_write_dump_co string '${quote}${pathstr}/dump.co_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj${quote}' # Name of coordinates dump file written with absolute path" &
       "variable fname_write_dump_topo string '${quote}${pathstr}/dump.topo_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj${quote}' # Name of coordinates dump file written with absolute path" &
-      "write_restart ${fname_write_restart} # Save current state" &
       "thermo_style custom step v_DTcurrent v_epsx v_epsy v_epsz v_epsv v_pf v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz # 15 entries" &
       "dump dump_co particles custom 1 ${fname_write_dump_co} id x y z diameter" &
       "dump_modify dump_co sort id" &
@@ -197,7 +196,8 @@ label labelcycleloop
       "run 0 # To save state in log file for post-processing" &
       "log ${fname_write_log} append" &
       "undump dump_co" &
-      "undump dump_topo"
+      "undump dump_topo" &
+	  "write_restart ${fname_write_restart} # Save current state"
       
     next steploop
     jump SELF labelsteploop
