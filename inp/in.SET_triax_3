@@ -10,6 +10,7 @@
 # INFO :
 # - MUST BE CALLED AFTER in.DEF_param_triax_3 SCRIPT
 # - MUST BE CALLED AFTER in.SET_macro_properties_3 SCRIPT
+# - MUST BE CALLED AFTER in.SET_ref_conf_3 SCRIPT
 #
 # TODO:
 # - 
@@ -18,13 +19,6 @@
 
 # ---- TOTAL SIMULATION EVOLUTION INFORMATION ---- #
 
-variable vol0 equal $(v_vol) # Initial volume at the moment the script is called, before any heating - cooling is performed
-variable epsv equal "v_vol/v_vol0 - 1.0" # Volumetric strain with reference to the first time the present script is called
-
-variable lx0 equal $(v_lx) # Initial length in x direction
-variable ly0 equal $(v_ly) # Initial length in y direction
-variable lz0 equal $(v_lz) # Initial length in z direction
-variable epsx equal "v_lx/v_lx0 - 1.0" # Engineering strain in x direction
-variable epsy equal "v_ly/v_ly0 - 1.0" # Engineering strain in y direction
-variable epsz equal "v_lz/v_lz0 - 1.0" # Engineering strain in z direction
+# This script is empty but kept for consistency, and in case information may be needed in the future
+# No additional information necessary for triaxial test that is not already present in script in.SET_ref_conf_3
 

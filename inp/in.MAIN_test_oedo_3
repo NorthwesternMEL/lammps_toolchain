@@ -79,7 +79,8 @@ compute final_topology particles pair/local force p4 p10 p11 p12 cutoff radius #
 thermo_style custom step v_voidratio # initialize void ratio
 run 0
 
-include in.SET_oedo_3 # Included here as it defines the state where there is zero strain
+include in.SET_ref_conf_3 # Defines the reference configuration before the start of the oedometric loading
+include in.SET_oedo_3 # Defines void ratio evolution for oedometric tests relative to the reference configuration
 
 ## Output initial state
 

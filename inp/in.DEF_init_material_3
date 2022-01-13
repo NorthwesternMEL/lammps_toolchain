@@ -28,7 +28,7 @@ variable nu equal ${var_init_material_3} # Poisson's ratio of the particles mate
 next var_init_material_3
 variable f equal ${var_init_material_3} # Friction coefficient between particles
 next var_init_material_3
-variable lcte equal ${var_init_material_3} # Linear Coefficient of Thermal Expansion [m / K]
+variable lcte equal ${var_init_material_3} # Linear Coefficient of Thermal Expansion [1 / K]
 next var_init_material_3
 variable ncdc equal ${var_init_material_3} # Normal contact damping coefficient, DEPRECATED ?
 next var_init_material_3

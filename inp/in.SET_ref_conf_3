@@ -1,0 +1,37 @@
+# LAMMPS INPUT FILE SETTING UP AND DEFINING THE GEOMETRY OF THE REFERENCE CONFIGURATION FOR TESTING OF THE 3D GRANULAR SYSTEMS
+# file: in.SET_ref_conf_3
+# author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
+#
+# THIS IS A SET SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT MUST NOT BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
+# THIS SCRIPT CAN BE CALLED MULTIPLE TIMES
+# THIS SCRIPT SHOULD NOT BE MODIFIED
+#
+#
+# INFO :
+# - MUST BE CALLED AFTER in.SET_boundary_3 SCRIPT
+# - MUST BE CALLED EACH TIME A NEW REFERENCE CONFIGURATION IS DEFINED, I.E., RIGHT BEFORE STARTING THE TESTING SEQUENCE
+#   - MUST BE CALLED RIGHT BEFORE in.SET_heat_cool_3 SCRIPT in main script in.MAIN_heat_cool_3
+#   - MUST BE CALLED RIGHT BEFORE in.SET_oedo_3 SCRIPT in main script in.MAIN_test_oedo_3
+#   - MUST BE CALLED RIGHT BEFORE in.SET_triax_3 SCRIPT in main script in.MAIN_test_triax_3
+#
+# TODO:
+# -
+# - 
+
+
+# ---- REFERENCE LENGTHS AND VOLUME FOR STRAIN DEFINITION ---- #
+
+variable vol0 equal $(v_vol) # Reference volume at the moment the script is called
+variable epsv equal "v_vol/v_vol0 - 1.0" # Volumetric strain with reference to the first time the present script is called
+
+variable lx0 equal $(v_lx) # Reference length in x direction
+variable ly0 equal $(v_ly) # Reference length in y direction
+variable lz0 equal $(v_lz) # Reference length in z direction
+variable epsx equal "v_lx/v_lx0 - 1.0" # Engineering strain in x direction
+variable epsy equal "v_ly/v_ly0 - 1.0" # Engineering strain in y direction
+variable epsz equal "v_lz/v_lz0 - 1.0" # Engineering strain in z direction
+
+variable lx0cell equal $(lx) # Reference cell length in x direction (used by Boundary controller)
+variable ly0cell equal $(ly) # Reference cell length in y direction (used by Boundary controller)
+variable lz0cell equal $(lz) # Reference cell length in z direction (used by Boundary controller)
+

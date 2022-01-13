@@ -48,9 +48,9 @@ variable dXX_BC equal f_BC_control_u1[$(v_id_vBC)][1]-f_BC_control_u0[$(v_id_vBC
 variable dYY_BC equal f_BC_control_u1[$(v_id_vBC)][2]-f_BC_control_u0[$(v_id_vBC)][2] # Boundary displacement in YY-direction
 variable dZZ_BC equal f_BC_control_u1[$(v_id_vBC)][3]-f_BC_control_u0[$(v_id_vBC)][3] # Boundary displacement in ZZ-direction
 
-variable lx0_BC equal $(lx) # Boundary strain-controlled always based on periodic cell
-variable ly0_BC equal $(ly) # Boundary strain-controlled always based on periodic cell
-variable lz0_BC equal $(lz) # Boundary strain-controlled always based on periodic cell
+variable lx0_BC equal $(v_lx0cell) # Boundary strain-controlled always based on periodic cell
+variable ly0_BC equal $(v_ly0cell) # Boundary strain-controlled always based on periodic cell
+variable lz0_BC equal $(v_lz0cell) # Boundary strain-controlled always based on periodic cell
 
 
 ## Calculation of the equivalent forces for boundary control

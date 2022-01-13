@@ -92,7 +92,7 @@ var_init_material_3+=(2629.0) # Density of particles [kg / m^3]: `rho`
 var_init_material_3+=(3.5*1e9) # Young's modulus of particles material [Pa]: `E`
 var_init_material_3+=(0.3) # Poisson's ratio of the particles material: `nu`
 var_init_material_3+=(0.5) # Friction coefficient between particles: `f`
-var_init_material_3+=(2.0*1e-5) # Linear Coefficient of Thermal Expansion [m / K]: `lcte`
+var_init_material_3+=(2.0*1e-5) # Linear Coefficient of Thermal Expansion [1 / K]: `lcte`
 var_init_material_3+=(0.0) # Normal contact damping coefficient, DEPRECATED ?: `ncdc`
 var_init_material_3+=(0.0) # Tangent contact damping ratio (tan = ratio * normal), DEPRECATED ?: `tcdr`
 
@@ -220,6 +220,7 @@ var_param_heat_cool_3+=(true) # Initial compression isotropic (true) or oedometr
 var_param_heat_cool_3+=(1e3) # Initial pressure level for heating-cooling cycles [Pa]: `Pheat_cool`
 var_param_heat_cool_3+=(1e-4) # Inertial number for initial compression: `In0_compression`
 # Heating - Cooling cycles
+var_param_heat_cool_3+=(1.2e-6) # Linear Coefficient of Thermal Expansion of the ring material [1 / K]: `lcte_ring`
 var_param_heat_cool_3+=(0) # Number of cycles (can be zero (0) for monotonic heating/cooling): `Ncycle`
 var_param_heat_cool_3+=(true) # Cycle starts with heating: `HEATING_FIRST`
 var_param_heat_cool_3+=(false) # Boundaries are fixed: `FIXED`

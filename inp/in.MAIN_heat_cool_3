@@ -72,6 +72,7 @@ else "print 'Script Error: flag SPHERE should have value true or false and was g
 
 variable P0 equal ${Pheat_cool}
 variable In0 equal ${In0_compression} # Overwrite the inertial number to smaller values for compression
+include in.SET_ref_conf_3 # Defines a reference configuration for the initial compression (necessary for boundary controller)
 
 if "${COMPRESSION_ISO}" then "include in.PRESET_BC_control_ISO_3 # preset isotropic conditions to target pressure" &
 elif "!${COMPRESSION_ISO}" "include in.PRESET_BC_control_OEDO_3 # preset oedometric conditions to target pressure" &
@@ -97,7 +98,8 @@ velocity dummy set 0.0 0.0 0.0 # Stop boundaries motion
 
 # ---- DEFINITION AND SETUP OF THE HEATING / COOLING PARAMETERS AND GLOBAL PROPERTIES ---- #
 
-include in.SET_heat_cool_3 # Included here as it defines the state where there is zero strain and reference temperature
+include in.SET_ref_conf_3 # Defines the new reference configuration, at the start of the thermal cycles
+include in.SET_heat_cool_3 # Define inflation relative to the reference temperature
 
 compute final_geometry particles property/local patom1 patom2 cutoff radius # Determines the contact topology
 compute final_topology particles pair/local force p4 p10 p11 p12 cutoff radius # Determines the contact properties
@@ -152,13 +154,17 @@ label labelcycleloop
     "variable Nrun equal ${Nrun_cool}" &
     "print '					COOLING, cycle $(v_cycleloop)'" &
     else "print 'Script Error: flag HEATING_FIRST should have value true or false and was given $(v_HEATING_FIRST)'" "quit"
-    
+
     variable steploop loop $(floor(v_DTtarget/v_DTstep+0.5)) # Heating/Cooling in steps of DTstep: ramp + equilibrium
     label labelsteploop
     
       #Boundary conditions
       if "${HEATCOOL_ISO}" then "include in.PRESET_BC_control_ISO_3 # preset isotropic conditions during heating/cooling" &
-      elif "!${HEATCOOL_ISO}" "include in.PRESET_BC_control_OEDO_3 # preset oedometric conditions during heating/cooling" &
+      elif "!${HEATCOOL_ISO}" &
+      "include in.PRESET_BC_control_HC_OEDO_3 # preset oedometric conditions with ring expansion during heating/cooling" &
+      "variable logstrain equal ln(1.0+v_DTcurrent*v_lcte_ring) # Radial strain due to ring thermal expansion" &
+      "variable BC_XX_TARGET equal v_logstrain #Overwrite Strain-controlled deformation in the x-direction" &
+      "variable BC_YY_TARGET equal v_logstrain #Overwrite Strain-controlled deformation in the y-direction" &
       else "print 'Script Error: flag HEATCOOL_ISO should have value true or false and was given $(v_HEATCOOL_ISO)'" "quit"
       
       # Temperature variation ramp

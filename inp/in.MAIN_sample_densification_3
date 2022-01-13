@@ -71,6 +71,7 @@ variable P0 equal ${Pdensification} # Overwrite reference pressure to pressure l
 variable In0 equal ${In0_pressure} # Overwrite the inertial number to smaller values for compression
 variable remap_save equal $(v_REMAP) # Save the value of REMAP passed to the script for later use
 variable REMAP equal true # Initial compaction always using remapping to ensure homogeneous compaction
+include in.SET_ref_conf_3 # Defines a reference configuration for the compression (necessary for boundary controller)
 
 variable SHEARRELAX equal false # No shear/tilt relax - orthogonal box: Hardcoded because triclinic seem to pose issues
 include in.PRESET_BC_control_ISO_3 # preset isotropic conditions to target pressure

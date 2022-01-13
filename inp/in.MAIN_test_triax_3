@@ -70,6 +70,7 @@ else "print 'Script Error: flag SPHERE should have value true or false and was g
 
 variable P0 equal ${Pconfine} # Sets the reference pressure equal to the confining pressure
 variable In0 equal ${In0_confine} # Overwrite the inertial number to smaller values for compression
+include in.SET_ref_conf_3 # Defines a reference configuration for the initial isotropic compression (necessary for boundary controller)
 
 include in.PRESET_BC_control_ISO_3 # preset oedometric conditions to target pressure
 include in.START_BC_control_3 # Start Boundary controller
@@ -89,7 +90,8 @@ include in.STOP_equilibrium_3
 
 # ---- DEFINITION AND SETUP OF THE TRIAXIAL PARAMETERS AND GLOBAL PROPERTIES ---- #
 
-include in.SET_triax_3 # Included here as it defines the state where there is zero strain
+include in.SET_ref_conf_3 # Defines the new reference configuration after consolidation, at the start of the triaxial shearing
+include in.SET_triax_3 # Defines quantities necessary for triaxial tests relative to the reference configuration
 
 # ---- STRAIN-CONTROLLED AXIAL STRAIN RATE ---- #
 
