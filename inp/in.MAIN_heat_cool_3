@@ -58,7 +58,7 @@ pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force 
 if "${SPHERE}" then &
 "fix damp_particles_visct floaters viscous ${viscdamp_lin} # Translational Global damping of particles" &
 "fix damp_particles_viscr floaters viscous/sphere ${viscdamp_rot} # Rotational Global damping of particles" &
-"fix damp_particles_Yade particles cundamp ${cundamp0} ${cundamp0} # Yade Translational and Rotational damping of particles" &
+"fix damp_particles_Cundall particles damping/cundall ${cundamp0} ${cundamp0} # Cundall Translational and Rotational damping of particles" &
 elif "!${SPHERE}" &
 "fix damp_particles_visct floaters viscous/rigid time_integration_clumps ${viscdamp_lin} ${viscdamp_rot} # Global damping of rigid particles" &
 "fix damp_particles_Yade particles cundamp/rigid time_integration_clumps ${cundamp0} ${cundamp0} # Yade Translational and Rotational damping of particles" &
@@ -170,6 +170,7 @@ label labelcycleloop
       # Temperature variation ramp
       if "!${FIXED}" then "include in.START_BC_control_3 # Start boundary controller only if simulation not in fixed box"
       thermo_style custom step v_DTcurrent v_epsv v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_convke v_convufr v_convfres v_convtqres
+      thermo_modify warn reset # Reset warning counter to avoid "Too many warning" messages that break Pizza.py post-processing of log files
       variable DTstart equal ${DTcurrent}
       variable DTstop equal $(v_DTstart+v_DTramp)
       variable DTcurrent equal ramp(${DTstart},${DTstop})

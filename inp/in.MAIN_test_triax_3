@@ -57,7 +57,7 @@ pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force 
 if "${SPHERE}" then &
 "fix damp_particles_visct floaters viscous ${viscdamp_lin} # Translational Global damping of particles" &
 "fix damp_particles_viscr floaters viscous/sphere ${viscdamp_rot} # Rotational Global damping of particles" &
-"fix damp_particles_Yade particles cundamp ${cundamp0} ${cundamp0} # Yade Translational and Rotational damping of particles" &
+"fix damp_particles_Cundall particles damping/cundall ${cundamp0} ${cundamp0} # Cundall Translational and Rotational damping of particles" &
 elif "!${SPHERE}" &
 "fix damp_particles_visct floaters viscous/rigid time_integration_clumps ${viscdamp_lin} ${viscdamp_rot} # Global damping of rigid particles" &
 "fix damp_particles_Yade particles cundamp/rigid time_integration_clumps ${cundamp0} ${cundamp0} # Yade Translational and Rotational damping of particles" &

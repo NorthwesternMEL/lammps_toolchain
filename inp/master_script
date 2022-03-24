@@ -40,6 +40,7 @@
 # - TODO:
 # - implement suffix and package for omp or intel acceleration
 # - Homogenization of the Ndump, Nthermo, Nchecks etc output
+# - Implement path_bin to run different lammps binaries in order to test some different compilations that may occur in other folders/different names
 #
 # =========================================================================== #
 #
