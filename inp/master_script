@@ -157,7 +157,7 @@ var_param_equilibrium_3+=(1e-4) # Tolerance on stress: `tolp0`
 var_param_sample_preparation_3=() 
 # Sample size
 var_param_sample_preparation_3+=(8e3) # Number of particles: `Nparticles`
-var_param_sample_preparation_3+=(1) # Aspect ratio of the sample Lz/Lx or Lz/Ly: `aspectratio`
+var_param_sample_preparation_3+=(1) # Aspect ratio of the sample Lx/Lz and Ly/Lz: `aspectratio`
 var_param_sample_preparation_3+=(1.5) # Additional padding of walls from periodic cell boundary: `wallpad`
 # Random generation
 var_param_sample_preparation_3+=(true) # Flag for PSD read from file: `READPSD`
