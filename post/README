@@ -1,4 +1,6 @@
 * Python post-processing files for LAMMPS simulations:
 
+The folder of pizza.py sources (lammps\tools\python\pizza) must be in the pythonpath environment variable
+
 - post3d.py : module of functions, using Pizza for log and dump files parsing, that analyze the geometry and topology of samples. Also obtain mechanical information from tests, e.g., triaxial, oedometric, heating-cooling
 - main_script_post_3d.py: base script (to be specified case-by-case) to perform a chosen post-processing and output of LAMMPS simulations data. Reads data, perform actions from post3d.py, writes results in a clean/structured way
