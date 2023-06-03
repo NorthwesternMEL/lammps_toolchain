@@ -104,11 +104,11 @@ include in.SET_heat_cool_3 # Define inflation relative to the reference temperat
 compute final_geometry particles property/local patom1 patom2 cutoff radius # Determines the contact topology
 compute final_topology particles pair/local force p4 p10 p11 p12 cutoff radius # Determines the contact properties
 
-variable fname_write_dump_co string "${quote}${pathstr}/dump.co_sample_before_cycles_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
-variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_sample_before_cycles_3${suffixstr}.lammpstrj${quote}" # Name of topology dump file written with absolute path
+variable fname_write_dump_co string "${pathstr}/dump.co_sample_before_cycles_3${suffixstr}.lammpstrj" # Name of coordinates dump file written with absolute path
+variable fname_write_dump_topo string "${pathstr}/dump.topo_sample_before_cycles_3${suffixstr}.lammpstrj" # Name of topology dump file written with absolute path
 
-variable fname_write_log string "${quote}${pathstr}/log.heat_cool_3${suffixstr}.lammps${quote}" # Name of the log file. Consistent with definition in `script_heat_cool_3`
-variable fname_write_log_eq string "${quote}${pathstr}/log.heat_cool_3_eq${suffixstr}.lammps${quote}" # Name of the log file for the equilibrium snapshots. Consistent with definition in `script_heat_cool_3`
+variable fname_write_log string "${pathstr}/log.heat_cool_3${suffixstr}.lammps" # Name of the log file. Consistent with definition in `script_heat_cool_3`
+variable fname_write_log_eq string "${pathstr}/log.heat_cool_3_eq${suffixstr}.lammps" # Name of the log file for the equilibrium snapshots. Consistent with definition in `script_heat_cool_3`
 
 
 # ---- INITIAL STATE BEFORE CYCLES ---- #
@@ -192,9 +192,9 @@ label labelcycleloop
       
       # Save equilibrium state at the end of the step
       if "(${HEATING} && ${SAVE_HEATING}) || (!${HEATING} && ${SAVE_COOLING})" then &
-      "variable fname_write_restart string '${quote}${pathstr}/restart.after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}${quote}' # Name of restart file written with absolute path" &
-      "variable fname_write_dump_co string '${quote}${pathstr}/dump.co_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj${quote}' # Name of coordinates dump file written with absolute path" &
-      "variable fname_write_dump_topo string '${quote}${pathstr}/dump.topo_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj${quote}' # Name of coordinates dump file written with absolute path" &
+      "variable fname_write_restart string '${pathstr}/restart.after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}' # Name of restart file written with absolute path" &
+      "variable fname_write_dump_co string '${pathstr}/dump.co_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj' # Name of coordinates dump file written with absolute path" &
+      "variable fname_write_dump_topo string '${pathstr}/dump.topo_sample_after_${heat_cool_str}_cycle_${cycleloop}_step_${steploop}${suffixstr}.lammpstrj' # Name of coordinates dump file written with absolute path" &
       "thermo_style custom step v_DTcurrent v_epsx v_epsy v_epsz v_epsv v_pf v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz # 15 entries" &
       "dump dump_co particles custom 1 ${fname_write_dump_co} id x y z diameter" &
       "dump_modify dump_co sort id" &

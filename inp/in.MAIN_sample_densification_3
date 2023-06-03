@@ -140,7 +140,7 @@ variable frictionstr string $(v_friction_reduction:%1.3f) # string of friction r
 
 # Walls coordinates
 
-variable fname_write_wall string "${quote}${pathstr}/wall.sample_densification_${frictionstr}_3${suffixstr}${quote}" # Name of wall file written with absolute path
+variable fname_write_wall string "${pathstr}/wall.sample_densification_${frictionstr}_3${suffixstr}" # Name of wall file written with absolute path
 
 if '${BC_XX_WALL} && ${BC_YY_WALL} && ${BC_ZZ_WALL}' then &
 'print """# Position of the walls after initial deposition
@@ -153,11 +153,11 @@ $(v_zhi_BC) # zhi wall """ file ${fname_write_wall}'
 
 # Particles coordinates and topology
 
-variable fname_write_dump_co string "${quote}${pathstr}/dump.co_sample_densification_${frictionstr}_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
+variable fname_write_dump_co string "${pathstr}/dump.co_sample_densification_${frictionstr}_3${suffixstr}.lammpstrj" # Name of coordinates dump file written with absolute path
 dump savedmpcoor particles custom 1 ${fname_write_dump_co} id x y z diameter
 dump_modify savedmpcoor sort id
 
-variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_sample_densification_${frictionstr}_3${suffixstr}.lammpstrj${quote}" # Name of topology dump file written with absolute path
+variable fname_write_dump_topo string "${pathstr}/dump.topo_sample_densification_${frictionstr}_3${suffixstr}.lammpstrj" # Name of topology dump file written with absolute path
 compute savepair particles property/local patom1 patom2 cutoff radius # pairs of particles within force cutoff
 compute savecontact particles pair/local force p4 p10 p11 p12 cutoff radius # interparticle distance, normal force magnitude, tangent force magnitude, branch vector x, y, z
 dump savedmptopo particles local 1 ${fname_write_dump_topo} c_savepair[*] c_savecontact[*]
@@ -166,7 +166,7 @@ run 0 # To output final coordinates and neighbor list
 
 # Restart / data file
 
-variable fname_write_restart string "${quote}${pathstr}/restart.sample_densification_${frictionstr}_3${suffixstr}${quote}" # Name of restart file written with absolute path
+variable fname_write_restart string "${pathstr}/restart.sample_densification_${frictionstr}_3${suffixstr}" # Name of restart file written with absolute path
 write_restart ${fname_write_restart}
-variable fname_write_data string "${quote}${pathstr}/data.sample_densification_${frictionstr}_3${suffixstr}${quote}" # Name of data file written with absolute path
+variable fname_write_data string "${pathstr}/data.sample_densification_${frictionstr}_3${suffixstr}" # Name of data file written with absolute path
 write_data ${fname_write_data}

@@ -3,7 +3,7 @@
 # Script for performing LAMMPS simulations
 # This allows to pass the relevant parameters to the LAMMPS input files to
 # avoid input files manipulation.
-# Can be seen as the 'input file of inpute files', a layer to run clean jobs
+# Can be seen as the 'input file of input files', a layer to run clean jobs
 #
 # Input files performing a given task, e.g., sample preparation are only
 # modified if there is a need for a new implementation. Preparing different
@@ -17,7 +17,7 @@
 # multiple instances of LAMMPS at the same time without corrupting and
 # overwriting data written by another instance. Providing a path to output the
 # files is the minimum requirement to avoid overwriting files and we need a
-# script to do that. We likely don't want to run 2 identicla instances, so we
+# script to do that. We likely don't want to run 2 identical instances, so we
 # also need to be able to pass different parameters, e.g. diameters, pressures.
 # These are not passed directly to LAMMPS, but to the input files. If we hard-
 # code input files, we need to modify them each time we want different
@@ -55,12 +55,15 @@
 path_in="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp"
 
 # Path to the folder where output files (dump,restart,data,log,wall) are saved
+# WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
 path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir" # `pathstr`
 
-# Suffix appended to output files (dump,restart,data,log,wall): no white space!
+# Suffix appended to output files (dump,restart,data,log,wall)
+# WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
 fname_suffix="" # If no suffix, use empty string ""
 
 # Restart file used in the simulation (absolute path)
+# WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
 file_restart="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\restart.sample_preparation_3" # If no restart file, use empty string "": `restartfile`
 
 
@@ -106,6 +109,7 @@ var_init_boundary_3+=(false) # Wall in XX direction (PBC if false): `BC_YY_WALL`
 var_init_boundary_3+=(false) # Wall in XX direction (PBC if false): `BC_ZZ_WALL`
 var_init_boundary_3+=(0.0) # Friction coefficient between walls and particles: `fwall`
 # Wall coordinates file used in the simulation (absolute path)
+# WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
 file_wall="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\wall.sample_preparation_3" # If no wall file, use empty string ""
 
 
@@ -179,6 +183,7 @@ var_param_sample_preparation_3+=(1e3) # Isotropic pressure of sample preparation
 var_param_sample_preparation_3+=(1e-2) # Inertial number for compression to reach target isotropic pressure: `In0_pressure`
 var_param_sample_preparation_3+=(1e-3) # Inertial number for final equilibrium (all convergence criteria): `In0_equilibrium`
 # Particle Size Distribution atomfile file used in the simulation (absolute path)
+# WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
 file_PSD="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\PSDtemplate\PSD_Foundry.atom" # If no PSD file, use empty string ""
 
 
@@ -263,8 +268,8 @@ fi
 # =========================================================================== #
 
 
-# source script_sample_preparation_3
-# wait
+source script_sample_preparation_3
+wait
 
 # You can change some of the parameters values between the simulations
 
@@ -283,7 +288,7 @@ fi
 
 # You can change some of the parameters values between the simulations
 
- source script_heat_cool_3
+# source script_heat_cool_3
 # wait
 
 

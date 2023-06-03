@@ -70,8 +70,8 @@ else "print 'Script Error: flag SPHERE should have value true or false and was g
 # ---- OEDOMETRIC TESTING ---- #
 ################################
 
-variable fname_write_log string "${quote}${pathstr}/log.test_oedo_3${suffixstr}.lammps${quote}" # Name of the log file. Consistent with definition in `script_test_oedo_3`
-variable fname_write_log_eq string "${quote}${pathstr}/log.test_oedo_3_eq${suffixstr}.lammps${quote}" # Name of the log file for the equilibrium snapshots. Consistent with definition in `script_test_oedo_3`
+variable fname_write_log string "${pathstr}/log.test_oedo_3${suffixstr}.lammps" # Name of the log file. Consistent with definition in `script_test_oedo_3`
+variable fname_write_log_eq string "${pathstr}/log.test_oedo_3_eq${suffixstr}.lammps" # Name of the log file for the equilibrium snapshots. Consistent with definition in `script_test_oedo_3`
 
 compute final_geometry particles property/local patom1 patom2 cutoff radius # Determines the contact topology
 compute final_topology particles pair/local force p4 p10 p11 p12 cutoff radius # Determines the contact properties
@@ -112,9 +112,9 @@ label lbl_oedo_test
   # Output of the results
   variable pzz_kpa equal v_P0/1000
   variable pzzstr string $(v_pzz_kpa:%4.0f) # string of Pressure level in kPa
-  variable fname_write_restart string "${quote}${pathstr}/restart.sample_oedo_P${pzzstr}kPa_3${suffixstr}${quote}" # Name of restart file written with absolute path
-  variable fname_write_dump_co string "${quote}${pathstr}/dump.co_sample_oedo_P${pzzstr}kPa_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
-  variable fname_write_dump_topo string "${quote}${pathstr}/dump.topo_sample_oedo_P${pzzstr}kPa_3${suffixstr}.lammpstrj${quote}" # Name of coordinates dump file written with absolute path
+  variable fname_write_restart string "${pathstr}/restart.sample_oedo_P${pzzstr}kPa_3${suffixstr}" # Name of restart file written with absolute path
+  variable fname_write_dump_co string "${pathstr}/dump.co_sample_oedo_P${pzzstr}kPa_3${suffixstr}.lammpstrj" # Name of coordinates dump file written with absolute path
+  variable fname_write_dump_topo string "${pathstr}/dump.topo_sample_oedo_P${pzzstr}kPa_3${suffixstr}.lammpstrj" # Name of coordinates dump file written with absolute path
       
   thermo_style custom step v_pxx v_pyy v_pzz v_press v_qdev v_pxy v_pxz v_pyz v_epsz v_epsv v_voidratio v_deltavoidratio v_pf # 16 entries
   dump dump_co particles custom 1 ${fname_write_dump_co} id x y z radius diameter

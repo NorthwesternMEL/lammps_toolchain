@@ -32,6 +32,6 @@ variable fwall equal ${var_init_boundary_3} # Friction coefficient between walls
 
 # File to get wall coordinates from. Read separately by LAMMPS command line switch for parsing purposes
 variable wallfile string ${file_wall} # Wall file read for the simulation
-variable fname_read_wall string "${quote}${wallfile}${quote}"
+variable fname_read_wall string "${wallfile}"
 # NEVER call `next` on the variable at the end of the definitions.
 # This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !

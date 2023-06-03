@@ -9,19 +9,18 @@
 # INFO :
 # - MUST BE CALLED BEFORE DEF_init_material SCRIPT IN MAIN SCRIPT
 # - MUST BE DEFINED BEFORE SET SCRIPTS IN MAIN SCRIPT
-# - input variables `file_restart`, `file_wall` (index-style) are passed to LAMMPS by command line switches -var path_out, -var fname_suffix
+# - input variables `file_restart`, `file_wall` (index-style) are passed to LAMMPS by command line switches -var file_restart, -var file_wall
 # - output variables `path_out`, `fname_suffix` (index-style) are passed to LAMMPS by command line switches -var path_out, -var fname_suffix
 #
 # TODO:
 # - 
 # - 
 
-variable quote string "'" # Hack to get output path that may have white space
 
 # ---- INPUT PARAMETERS ---- #
 
 variable restartfile string ${file_restart} # Restart file read for the simulation
-variable fname_read_restart string "${quote}${restartfile}${quote}"
+variable fname_read_restart string "${restartfile}"
 
 # ---- OUTPUT PARAMETERS ---- #
 

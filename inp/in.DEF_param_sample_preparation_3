@@ -64,6 +64,6 @@ variable In0_equilibrium equal ${var_param_sample_preparation_3} # Inertial numb
 
 # File to get PSD from. Read separately by LAMMPS command line switch for parsing purposes
 variable PSDfile string ${file_PSD} # Particle Size distribution file read for the simulation, put this here and not in `in.DEF_init_material` because it is only needed for sample preparation
-variable fname_read_PSD string "${quote}${PSDfile}${quote}" # Once sample is created, restart files contain the diameter info and a PSD file is not need
+variable fname_read_PSD string "${PSDfile}" # Once sample is created, restart files contain the diameter info and a PSD file is not need
 # NEVER call `next` on the variable at the end of the definitions.
 # This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !
