@@ -10,13 +10,22 @@ Python 2 post-processing functions for LAMMPS 3-dimensional DEM simulations
 Obtain geometry and topology descriptors from LAMMPS fump files
 The geometry dump *MUST* be ordered by atom id (dump_modify sort id)
 
+Copyright (C) 2023 Mechanics and Energy Laboratory, Northwestern University
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
 The naming of the variables in the dump columns is overwritten using dictionaries as:
     - Geometry dump:
         x,y,z: particle coordinates
         radius, diameter: radius, diameter of the particle
-
-
-
 
     - Topology dump:
         id1, id2: the atom ID of particles 1 and 2 in the given contact

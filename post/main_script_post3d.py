@@ -1,16 +1,29 @@
 # -*- coding: utf-8 -*-
 """
 
-@author: JBC @ Northwestern University (jibril.coulibaly@gmail.com)
-
-script: main_script_post3d.py
-
 Python 2 post-processing scripts for LAMMPS 3-dimensional DEM simulations post-processing
 The purpose of this script is to get a very clean working directory
 Call the functions from a base location
 get the input from a target directory
 save the output in a target directory
 rename conventions etc
+
+@author: JBC @ Northwestern University (jibril.coulibaly@gmail.com)
+
+script: main_script_post3d.py
+
+
+Copyright (C) 2023 Mechanics and Energy Laboratory, Northwestern University
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
 
 The naming of the variables in the dump dictionaries MUST respect the following standards:

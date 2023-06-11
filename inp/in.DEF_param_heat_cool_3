@@ -2,6 +2,18 @@
 # file: in.DEF_param_heat_cool_3
 # author: JBC @ NORTHWESTERN UNIVERSITY, (jibril.coulibaly@gmail.com)
 #
+# Copyright (C) 2023 Mechanics and Energy Laboratory, Northwestern University
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
 # THIS IS A DEF SCRIPT, ALL VARIABLES AND COMPUTES IN THIS SUBSCRIPT ARE GLOBAL AND GIVEN DEFAULT VALUES THAT CAN BE OVERWRITTEN LOCALLY IN THE MAIN SCRIPT
 # THIS SCRIPT MUST ONLY BE CALLED ONE TIME
 #

@@ -4,7 +4,21 @@ Created on Fri Oct  4 09:54:46 2019
 
 Creation of particle size distribution atomfile for LAMMPS based on actual soils PSD
 
-@author: jibri
+author: Jibril B. Coulibaly
+
+#
+# Copyright (C) 2023 Mechanics and Energy Laboratory, Northwestern University
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
 """
 
 import matplotlib.pyplot as plt

@@ -1,4 +1,3 @@
 # Pre-processing git ignore file 
 
-
-dev_legacy/
+*.csv
