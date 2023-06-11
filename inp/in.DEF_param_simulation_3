@@ -58,6 +58,16 @@ variable viscdamp_lin equal "v_viscdamp0*2*sqrt(v_msys*v_knhertz)" # Linear damp
 variable viscdamp_rot equal "v_viscdamp0*0.5*v_dsys^2*sqrt(2*v_msys*v_kthertz/5)" # Angular damping factor gamma= viscdamp0*d^2*sqrt(m*kt)/2, see Tu and Andrade, 2008 (DOI: 10.1002/nme.2322). T = -gamma * omega
 # The old issue of viscous forces blowing up came mostly from the diameter not being squared. We might try and see if we get something reasonable using `overlap_step` instead of `K0` in the future
 
+# Gravity
+variable gravity_mag equal ${var_param_simulation_3} # Magnitude of gravity
+next var_param_simulation_3
+variable gravity_x equal ${var_param_simulation_3} # direction of gravity along x-axis: +/- 1
+next var_param_simulation_3
+variable gravity_y equal ${var_param_simulation_3} # direction of gravity along y-axis: +/- 1
+next var_param_simulation_3
+variable gravity_z equal ${var_param_simulation_3} # direction of gravity along z-axis: +/- 1
+next var_param_simulation_3
+
 # Run
 variable Nrun equal ${var_param_simulation_3} # Number of timestep of a classic run (ramps, etc)
 next var_param_simulation_3
@@ -68,6 +78,7 @@ next var_param_simulation_3
 variable Nthermo equal ${var_param_simulation_3} # Frequency of thermo output
 next var_param_simulation_3
 variable Ndump equal ${var_param_simulation_3} # Frequency of dump output
+
 # NEVER call `next` on the variable at the end of the definitions.
 # This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !
 

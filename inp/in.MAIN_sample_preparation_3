@@ -159,6 +159,7 @@ if "${SPHERE}" then "fix damping_particles particles damping/cundall ${cundamp0}
 elif "!${SPHERE}" "fix damping_particles particles cundamp/rigid time_integration_clumps ${cundamp0} ${cundamp0}" &
 else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
 
+fix gravity_particles particles gravity ${gravity_mag} vector ${gravity_x} ${gravity_y} ${gravity_z}
 
 ## PERCOLATION SHRINKAGE 
 

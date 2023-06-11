@@ -64,6 +64,8 @@ elif "!${SPHERE}" &
 "fix damp_particles_Yade particles cundamp/rigid time_integration_clumps ${cundamp0} ${cundamp0} # Yade Translational and Rotational damping of particles" &
 else "print 'Script Error: flag SPHERE should have value true or false and was given $(v_SPHERE)'" "quit"
 
+#---- GRAVITY ----#
+fix gravity_particles particles gravity ${gravity_mag} vector ${gravity_x} ${gravity_y} ${gravity_z}
 
 #####################################################################
 # ---- ISOTROPIC/OEDOMETRIC COMPRESSION TO THE TARGET PRESSURE ---- #

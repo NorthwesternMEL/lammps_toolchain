@@ -52,11 +52,11 @@
 # Path must be read on their own by LAMMPS command line swtch in order to get the parsing with white space
 #
 # Path to 'inp' folder where input files are located
-path_in="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp"
+path_in="path_to_inp"
 
 # Path to the folder where output files (dump,restart,data,log,wall) are saved
 # WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
-path_out="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir" # `pathstr`
+path_out="path_to_outdir" # `pathstr`
 
 # Suffix appended to output files (dump,restart,data,log,wall)
 # WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
@@ -64,7 +64,7 @@ fname_suffix="" # If no suffix, use empty string ""
 
 # Restart file used in the simulation (absolute path)
 # WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
-file_restart="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\restart.sample_preparation_3" # If no restart file, use empty string "": `restartfile`
+file_restart="path_to_restart_file" # If no restart file, use empty string "": `restartfile`
 
 
 date
@@ -110,7 +110,7 @@ var_init_boundary_3+=(false) # Wall in XX direction (PBC if false): `BC_ZZ_WALL`
 var_init_boundary_3+=(0.0) # Friction coefficient between walls and particles: `fwall`
 # Wall coordinates file used in the simulation (absolute path)
 # WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
-file_wall="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\outdir\wall.sample_preparation_3" # If no wall file, use empty string ""
+file_wall="path_to_wall_file" # If no wall file, use empty string "": `file_wall`
 
 
 
@@ -122,6 +122,11 @@ var_param_simulation_3+=(0.2) # Fraction of critical timestep sqrt(M/K) used for
 # Damping
 var_param_simulation_3+=(0.2) # Non-viscous damping factor of Cundall/Yade-DEM damping: `cundamp0`
 var_param_simulation_3+=(0.01) # Viscous damping factor for viscous damping of floaters: `viscdamp0`
+# Gravity
+var_param_simulation_3+=(9.81)  # Magnitude of gravity, use 0 for simulation without gravity
+var_param_simulation_3+=(0) # direction of gravity along x-axis: +/- 1
+var_param_simulation_3+=(0) # direction of gravity along y-axis: +/- 1
+var_param_simulation_3+=(-1) # direction of gravity along z-axis: +/- 1
 # Run
 var_param_simulation_3+=(100000) # Number of timestep of classic finite run: `Nrun`
 var_param_simulation_3+=(10000000) # Maximum number of timestep of a converging run: `Nmax`
@@ -184,7 +189,7 @@ var_param_sample_preparation_3+=(1e-2) # Inertial number for compression to reac
 var_param_sample_preparation_3+=(1e-3) # Inertial number for final equilibrium (all convergence criteria): `In0_equilibrium`
 # Particle Size Distribution atomfile file used in the simulation (absolute path)
 # WARNING: THIS PATH MUST NOT HAVE ANY WHITESPACE
-file_PSD="C:\Users\jibri\Documents\POSTDOC_JBC\001 - CODES\LAMMPS\inp\PSDtemplate\PSD_Foundry.atom" # If no PSD file, use empty string ""
+file_PSD="path_to_PSD_atom_file" # If no PSD file, use empty string "": `file_PSD`
 
 
 
