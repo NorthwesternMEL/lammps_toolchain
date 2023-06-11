@@ -1,6 +1,6 @@
-** LAMMPS pre-processing, simulations input files and post-processing files of the Mechanics and Energy Laboratory at Northwestern University
+**LAMMPS pre-processing, simulations input files and post-processing files of the Mechanics and Energy Laboratory at Northwestern University.**
 
-Last tested for LAMMPS version 28Mar2023. No guarantee for any other version of LAMMPS
+*Last tested for LAMMPS version 28Mar2023. No guarantee for any other version of LAMMPS.*
 
 Naming and description of the LAMMPS directory tree :
 
