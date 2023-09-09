@@ -35,13 +35,21 @@ fname = "PSD_Fonderie.csv" # Tabulated PSD for actual soil: must be formated as 
 passing_data = np.genfromtxt(fname, delimiter=',',names=True)['passing'] # Percent pasing in terms of mass or volume
 size_data = np.genfromtxt(fname, delimiter=',',names=True)['size'] # Size of the particle in mm
 
-Ninterp = 1000 # Linear interpolation of the sieve data
+# The input PSD in the file might be truncated
+# e.g., if large fraction of small grains, or very large grains.
+# Once this fraction is discarded, we get a new PSD to fit. To do so, we first
+# re-normalize the PSD to span from 0% to 100% passing
+psdmassfraction = passing_data[-1] - passing_data[0]
+normalized_passing_data = (passing_data - passing_data[0]) / psdmassfraction
+
+Ninterp = 1000 # Linear interpolation of the normalized sieve data
 size_interp = np.linspace(size_data[0],size_data[-1],Ninterp)
 passing_interp = np.interp(size_interp,size_data,passing_data)
-
-delta_passing_interp = np.insert(np.diff(passing_interp),0,0)
+passing_interp = (passing_interp - passing_interp[0])/psdmassfraction
+diff_passing = np.diff(passing_interp)
+delta_passing_interp = 0.5*(np.insert(diff_passing,0,0.0) + np.append(diff_passing,0.0))
 vol_interp = size_interp**3
-nparticle_interp = delta_passing_interp/vol_interp # en Y ?
+nparticle_interp = delta_passing_interp/vol_interp
 density_interp = nparticle_interp/np.trapz(nparticle_interp,size_interp)
 cumulative_interp = integrate.cumtrapz(density_interp,size_interp,initial=0)
 
@@ -59,12 +67,21 @@ vol_DEM = np.sort(size_DEM)**3
 passing_DEM = np.cumsum(vol_DEM)/np.sum(vol_DEM)
 plt.figure()
 plt.semilogx(size_data,100*passing_data,'ko',label='Sieve data')
-plt.semilogx(np.sort(size_DEM)*1000,100*passing_DEM,'r',label='DEM sample')
+plt.semilogx(np.sort(size_DEM)*1000,100*(passing_DEM*psdmassfraction + passing_data[0]),'r',label='de-normalized DEM sample')
 plt.title('Particle size distribution of Foundry sand')
 plt.xlabel('Particle size [mm]')
 plt.ylabel('Percent passing by weight [%]')
 plt.legend()
 plt.savefig('PSD_Foundy_sieve_DEM.jpg',format='jpg',bbox_inches='tight',dpi=300)
+
+plt.figure(2)
+plt.semilogx(size_data,100*normalized_passing_data,'ko',label='Normalized sieve data')
+plt.semilogx(np.sort(size_DEM)*1000,100*passing_DEM,'r',label='DEM sample')
+plt.title('Particle size distribution of Foundry sand')
+plt.xlabel('Particle size [mm]')
+plt.ylabel('Percent passing by weight [%]')
+plt.legend()
+plt.savefig('PSD_Foundry_normalized_sieve_DEM.jpg',format='jpg',bbox_inches='tight',dpi=300)
 
 # ---------------------------#
 # WRITING OF LAMMPS ATOMFILE #
