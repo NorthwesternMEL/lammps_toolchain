@@ -45,6 +45,11 @@
 #
 # Everything is ran by passing variable argument to LAMMPS by command-line
 # using the -var switch
+# WARNING: LAMMPS parser looks for the '-' symbol to start a new command-line
+# option, therefore, negative arguments must be passed using 2 sets of quotes,
+# e.g., "'arg'" of '"arg"', the first set of quotes is stripped by bash and the
+# second set of quotes starts the command-line argument so the parser does not
+# see the negative sign '-'.
 #
 # The scripts are written in bash. This is out of generality to be able to
 # perform the simulations both in Windows platforms that have consoles that
@@ -112,6 +117,10 @@ var_init_material_3+=(0.5) # Friction coefficient between particles: `f`
 var_init_material_3+=(2.0*1e-5) # Linear Coefficient of Thermal Expansion [1 / K]: `lcte`
 var_init_material_3+=(0.0) # Normal contact damping coefficient, DEPRECATED ?: `ncdc`
 var_init_material_3+=(0.0) # Tangent contact damping ratio (tan = ratio * normal), DEPRECATED ?: `tcdr`
+var_init_material_3+=(1e-5) # Overlap of tangent Hertz stiffness (relative to diameter) considered for rolling resistance stiffness: `overlap_kroll`. This (and friction limit) controls the intensity of the rolling resistance. Recommend using overlap=1/K with K=(E/(P*(1-nu^2)))^(2/3) for a target pressure P (cannot use variable value K0 because P0 can change during a run, e.g. oedometric loading). Use 0.0 to turn off rolling resistance
+var_init_material_3+=(0.5) # Friction coefficient for rolling resistance [-]: `froll` (use 0.0 to turn off rollign resistance)
+var_init_material_3+=(0.0) # Rolling resistance damping coefficient: `rrdc` (please do not use rolling damping: keep rrdc=0)
+var_init_material_3+=(true) # Twisting resistance: `TWIST` converted internally to `twistmodel`={none,marshall} in `in.DEF_param_simulation_3`. Material parameters determined by LAMMPS from `E`, `nu`, `f`, `ncdc` and `tcdr`
 
 
 

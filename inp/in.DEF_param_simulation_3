@@ -58,6 +58,23 @@ variable kthertz_tstep equal "v_knhertz_tstep*(2-2*v_nu)/(2-v_nu)" # Tangent Her
 variable tsyshertz_kn equal "sqrt(v_mmin/v_knhertz_tstep)" # Critical timestep based on normal stiffness
 variable tsyshertz_kt equal "sqrt(2*v_mmin/(5*v_kthertz_tstep))" # Critical timestep based on tangent stiffness (more conservative: see Tu and Andrade, 2008 (DOI: 10.1002/nme.2322))
 
+# Rolling resistance
+# current LAMMPS sds model only allows constant values, we try to find orders of magnitudes for the rolling stiffness and friction
+# We cannot base it on P0, because P0 can change during a run and if we change the stiffness, contact model could blow up
+# Long term solution would be to define something similar to Marshall for twisting, where the contact radius a is used to compute stiffness from material properties, something like sds/material
+# For now, we assume a rolling stiffness equal to the tangent stiffness of the Hertz model for a chosen equivalent overlap
+# Recommend using overlap=1/K with K=(E/(P*(1-nu^2)))^(2/3) for a target pressure P (cannot use variable value K0 because P0 can change during a run, e.g. oedometric loading)
+variable kroll equal "v_E*(2*v_dmin*v_dmax/(v_dmin+v_dmax))/(2*(1-v_nu^2))*sqrt(v_overlap_kroll)*(2-2*v_nu)/(2-v_nu)" # Tangent Hertz stiffness for rolling resistance, based on estimated overlap for rolling resistance `overlap_kroll`
+
+# Twisting resistance ['marshall' if true, 'none' is false]
+if "${TWIST}" then &
+"variable twistmodel string 'marshall'" &
+elif "!${TWIST}" &
+"variable twistmodel string 'none'" &
+else &
+"print 'Script Error: twisting resistance should have value true or false and was given $(v_TWIST)'" &
+"quit"
+
 # Damping
 variable cundamp0 equal ${var_param_simulation_3} # Non-viscous damping factor for Cundall/Yade-DEM damping
 next var_param_simulation_3

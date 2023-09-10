@@ -62,7 +62,7 @@ include in.SET_conv_3
 # ---- MATERIAL AND CONTACT LAW ---- #
 
 pair_style	granular
-pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} $f # Contact law with friction
+pair_coeff * * hertz/material $E ${ncdc} ${nu} tangential mindlin_rescale/force NULL ${tcdr} $f rolling sds ${kroll} ${rrdc} ${froll} twisting ${twistmodel} # Contact law with friction, rolling, twisting resistance
 
 # ---- DAMPING ---- #
 

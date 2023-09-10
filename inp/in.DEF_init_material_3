@@ -36,15 +36,26 @@ variable rho equal ${var_init_material_3} # Density of particles [kg / m^3]
 next var_init_material_3
 variable E equal ${var_init_material_3} # Young's modulus of the particles material [Pa]
 next var_init_material_3
-variable nu equal ${var_init_material_3} # Poisson's ratio of the particles material
+variable nu equal ${var_init_material_3} # Poisson's ratio of the particles material [-]
 next var_init_material_3
-variable f equal ${var_init_material_3} # Friction coefficient between particles
+variable f equal ${var_init_material_3} # Friction coefficient for tangent contact between particles [-]
 next var_init_material_3
 variable lcte equal ${var_init_material_3} # Linear Coefficient of Thermal Expansion [1 / K]
 next var_init_material_3
 variable ncdc equal ${var_init_material_3} # Normal contact damping coefficient, DEPRECATED ?
 next var_init_material_3
 variable tcdr equal ${var_init_material_3} # Tangent contact damping ratio (tan = ratio * normal), DEPRECATED ?
+
+next var_init_material_3
+variable overlap_kroll equal ${var_init_material_3} # Overlap of tangent Hertz stiffness (relative to diameter) considered for rolling resistance stiffness. Recommend using overlap=1/K with K=(E/(P*(1-nu^2)))^(2/3) for a target pressure P (cannot use variable value K0 because P0 can change during a run, e.g. oedometric loading)
+next var_init_material_3
+variable froll equal ${var_init_material_3} # Friction coefficient for rolling resistance [-]
+next var_init_material_3
+variable rrdc equal ${var_init_material_3} # Rolling resistance damping coefficient [-]
+
+next var_init_material_3
+variable TWIST equal ${var_init_material_3}
+
 # NEVER call `next` on the variable at the end of the definitions.
 # This would exhaust the variable and skip the next `jump` command and cause other scripts to fail !
 
