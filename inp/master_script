@@ -281,12 +281,13 @@ echo_option=log # LAMMPS input script commands echoed in: none, screen, log, bot
 screen_option='' # LAMMPS thermo output to screen: '-screen none', '-screen <filename>' or '' (empty, for regular console output). must be last option
 run_MPI=yes # use parallel (yes) or serial (no) computation
 nproc_MPI=8 # Number of MPI processors used for the simulation (if MPI)
+lmp_bin="lmp_mpi" # Name of the LAMMPS executable to be used, modify if necessary
 
 # Create automatic LAMMPS call DO NOT MODIFY
 if [ $run_MPI == no ]; then
-  lmp_run="lmp_serial"
+  lmp_run="$lmp_bin"
 elif [ $run_MPI == yes ]; then
-  lmp_run="mpiexec -n $nproc_MPI lmp_mpi"
+  lmp_run="mpiexec -n $nproc_MPI $lmp_bin"
 fi
 
 
