@@ -63,8 +63,8 @@ variable convtqres equal "c_tqresmax/v_Tqsys" # Convergence condition on the abs
 ## Convergence on unbalanced force ratio UFR
 
 compute fcon particles pair/local force p4 # normal force magnitude, tangent force magnitude
-compute nfcon particles reduce sum c_fcon[1] # Sum of normal force
-compute tfcon particles reduce sum c_fcon[2] # Sum of tangent force
+compute nfcon particles reduce sum c_fcon[1] inputs local # Sum of normal force
+compute tfcon particles reduce sum c_fcon[2] inputs local # Sum of tangent force
 variable fconsum equal "sqrt(c_nfcon^2 + c_tfcon^2)" # Compute lower bound of sum of contact force (cannot do operations on local vectors in LAMMPS...)
 compute fresave particles reduce ave v_fres # Compute average of residual force
 variable convufr equal "(c_fresave)/(2*(v_fconsum+v_Fsys*1e-6)/(1+c_zsum))" # Convergence condition on the unbalanced force ratio [Ng 2006]. Add one in the number of contacts and add a tiny force in the sum of contact forces to avoid division by zero. should have very limited influence in large systems with high number of contacts
@@ -102,9 +102,9 @@ variable convtqres equal "v_tqresmax/v_Tqsys" # Convergence condition on the abs
 ## Convergence on unbalanced force ratio UFR
 
 compute fcon particles pair/local force p4 # normal force magnitude, tangent force magnitude
-compute nfmax particles reduce max c_fcon[1]
-compute nfcon particles reduce sum c_fcon[1] # Sum of normal force
-compute tfcon particles reduce sum c_fcon[2] # Sum of tangent force
+compute nfmax particles reduce max c_fcon[1] inputs local
+compute nfcon particles reduce sum c_fcon[1] inputs local # Sum of normal force
+compute tfcon particles reduce sum c_fcon[2] inputs local # Sum of tangent force
 variable fconsum equal "sqrt(c_nfcon^2 + c_tfcon^2)" # Compute lower bound of sum of contact force (cannot do operations on local vectors in LAMMPS...)
 variable fresave equal ave(v_fres_clump) # average residual force on clumps
 variable convufr equal "(v_fresave)/(2*(v_fconsum+v_Fsys*1e-6)/(1+c_zsum))" # Convergence condition on the unbalanced force ratio [Ng 2006]. Add one in the number of contacts and add a tiny force in the sum of contact forces to avoid division by zero. should have very limited influence in large systems with high number of contacts
